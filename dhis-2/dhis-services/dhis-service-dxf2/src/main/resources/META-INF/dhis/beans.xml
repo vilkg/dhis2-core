@@ -96,6 +96,8 @@
 
   <bean id="org.hisp.dhis.dxf2.events.TrackerAccessManager" class="org.hisp.dhis.dxf2.events.DefaultTrackerAccessManager" />
 
+  <bean id="org.hisp.dhis.dxf2.events.eventdatavalue.EventDataValueService" class="org.hisp.dhis.dxf2.events.eventdatavalue.DefaultEventDataValueService" />
+
   <bean class="org.hisp.dhis.dxf2.events.kafka.DefaultTrackerKafkaManager" />
 
   <bean id="kafkaTrackerJob" class="org.hisp.dhis.dxf2.events.kafka.KafkaTrackerJob" />

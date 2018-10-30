@@ -1278,6 +1278,10 @@
     class="org.hisp.dhis.trackedentitydatavalue.DefaultTrackedEntityDataValueService">
   </bean>
 
+  <bean id="org.hisp.dhis.eventdatavalue.EventDataValueService"
+    class="org.hisp.dhis.eventdatavalue.DefaultEventDataValueService">
+  </bean>
+
   <bean id="org.hisp.dhis.program.ProgramStageDataElementService"
     class="org.hisp.dhis.program.DefaultProgramStageDataElementService">
     <property name="programStageDataElementStore" ref="org.hisp.dhis.program.ProgramStageDataElementStore" />

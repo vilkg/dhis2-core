@@ -198,17 +198,8 @@ public abstract class AbstractEventService
     @Autowired
     protected CurrentUserService currentUserService;
 
-//    @Autowired
-//    protected EventDataValueService eventDataValueService;
-
     @Autowired
     protected EventDataValueService eventDataValueService;
-
-//    @Autowired
-//    protected TrackedEntityDataValueService dataValueService;
-
-    @Autowired
-    private TrackedEntityDataValueAuditService dataValueAuditService;
 
     @Autowired
     protected TrackedEntityInstanceService entityInstanceService;
@@ -1280,7 +1271,6 @@ public abstract class AbstractEventService
 
         preheatDataElementsCache( event, importOptions );
         eventDataValueService.processDataValues( programStageInstance, event, true, singleValue, importOptions, importSummary, dataElementCache );
-//        processDataValues( programStageInstance, event, true, singleValue, importOptions, importSummary );
 
         if ( importSummary.getConflicts().size() > 0 ) {
             importSummary.setStatus( ImportStatus.ERROR );
@@ -1294,116 +1284,9 @@ public abstract class AbstractEventService
         return importSummary;
     }
 
-    // ####################################### OLD #######################################
-//    private void processDataValues( ProgramStageInstance programStageInstance, Event event, boolean isUpdate,
-//        boolean singleValue, ImportOptions importOptions, ImportSummary importSummary ) {
-//
-//        Map<String, EventDataValue> dataElementValueMap = getDataElementToEventDataValueMap( programStageInstance.getEventDataValues() );
-//
-//        boolean validateMandatoryAttributes = doValidationOfMandatoryAttributes( importOptions.getUser() );
-//        if ( validateMandatoryAttributes )
-//        {
-//            if ( !validatePresenceOfMandatoryDataElements( event, programStageInstance, importSummary, singleValue ) )
-//            {
-//                importSummary.setStatus( ImportStatus.ERROR );
-//                importSummary.incrementIgnored();
-//
-//                return;
-//            }
-//        }
-//
-//        Set<EventDataValue> updatedOrNewDataValues = new HashSet<>();
-//        Set<EventDataValue> removedDataValuesDueToEmptyValue = new HashSet<>();
-//        String fallbackStoredBy = getStoredBy( event, importSummary, importOptions.getUser() != null ? importOptions.getUser().getUsername() : "[Unknown]" );
-//
-//        for ( DataValue dataValue : event.getDataValues() )
-//        {
-//            String storedBy = !StringUtils.isEmpty( dataValue.getStoredBy() ) ? dataValue.getStoredBy() : fallbackStoredBy;
-//            DataElement dataElement = getDataElement( importOptions.getIdSchemes().getDataElementIdScheme(), dataValue.getDataElement() );
-//
-//            if ( dataElement == null ) {
-//                // This can happen if a wrong data element identifier is provided
-//                importSummary.getConflicts().add( new ImportConflict( "dataElement", dataValue.getDataElement() + " is not a valid data element" ) );
-//            }
-//            else if ( validateDataValue( programStageInstance, importOptions.getUser(), dataElement, dataValue.getValue(), importSummary )
-//                && !importOptions.isDryRun())
-//            {
-//                prepareDataValueForStorage( updatedOrNewDataValues, removedDataValuesDueToEmptyValue, dataElementValueMap, programStageInstance, dataValue, dataElement, storedBy );
-//            }
-//        }
-//
-//        if ( singleValue ) {
-//            //If it is only a single value update, I don't won't to miss the values that are missing in the payload but already present in the DB
-//            Set<EventDataValue> changedDatValues = Sets.union( updatedOrNewDataValues, removedDataValuesDueToEmptyValue );
-//            Set<EventDataValue> unchangedDataValues = Sets.difference( programStageInstance.getEventDataValues(), changedDatValues );
-//            programStageInstance.setEventDataValues( updatedOrNewDataValues );
-//            programStageInstance.getEventDataValues().addAll( unchangedDataValues );
-//        }
-//        else {
-//            programStageInstance.setEventDataValues( updatedOrNewDataValues );
-//        }
-//
-//        programStageInstanceService.updateProgramStageInstance( programStageInstance );
-//
-//        if ( isUpdate && !importOptions.isSkipNotifications() )
-//        {
-//            eventPublisher.publishEvent( new DataValueUpdatedEvent( this, programStageInstance ) );
-//        }
-//    }
-    // ####################################### OLD #######################################
-
     private void preheatDataElementsCache(Event event, ImportOptions importOptions) {
         event.getDataValues().forEach( dv -> getDataElement( importOptions.getIdSchemes().getDataElementIdScheme(), dv.getDataElement() ) );
     }
-
-    // ####################################### NEW #######################################
-//    private void processDataValues( ProgramStageInstance programStageInstance, Event event, boolean isUpdate,
-//        boolean singleValue, ImportOptions importOptions, ImportSummary importSummary ) {
-//
-//        Map<String, EventDataValue> dataElementValueMap = getDataElementToEventDataValueMap( programStageInstance.getEventDataValues() );
-//
-//        boolean validateMandatoryAttributes = doValidationOfMandatoryAttributes( importOptions.getUser() );
-//        if ( validateMandatoryAttributes )
-//        {
-//            if ( !validatePresenceOfMandatoryDataElements( event, programStageInstance, importSummary, singleValue ) )
-//            {
-//                importSummary.setStatus( ImportStatus.ERROR );
-//                importSummary.incrementIgnored();
-//
-//                return;
-//            }
-//        }
-//
-//        Set<EventDataValue> newDataValues = new HashSet<>();
-//        Set<EventDataValue> updatedDataValues = new HashSet<>();
-//        Set<EventDataValue> removedDataValuesDueToEmptyValue = new HashSet<>();
-//        String fallbackStoredBy = getStoredBy( event, importSummary, importOptions.getUser() != null ? importOptions.getUser().getUsername() : "[Unknown]" );
-//
-//        for ( DataValue dataValue : event.getDataValues() )
-//        {
-//            String storedBy = !StringUtils.isEmpty( dataValue.getStoredBy() ) ? dataValue.getStoredBy() : fallbackStoredBy;
-//            DataElement dataElement = getDataElement( importOptions.getIdSchemes().getDataElementIdScheme(), dataValue.getDataElement() );
-//
-//            if ( dataElement == null ) {
-//                // This can happen if a wrong data element identifier is provided
-//                importSummary.getConflicts().add( new ImportConflict( "dataElement", dataValue.getDataElement() + " is not a valid data element" ) );
-//            }
-//            else if ( validateDataValue( programStageInstance, importOptions.getUser(), dataElement, dataValue.getValue(), importSummary )
-//                && !importOptions.isDryRun())
-//            {
-//                prepareDataValueForStorage( dataElementValueMap, programStageInstance, dataValue, dataElement, newDataValues,
-//                    updatedDataValues, removedDataValuesDueToEmptyValue, storedBy );
-//            }
-//        }
-//
-//        eventDataValueService.persistDataValues( newDataValues, updatedDataValues, newDataValues, dataElementCache, programStageInstance, singleValue );
-//
-//        if ( isUpdate && !importOptions.isSkipNotifications() )
-//        {
-//            eventPublisher.publishEvent( new DataValueUpdatedEvent( this, programStageInstance ) );
-//        }
-//    }
-    // ####################################### NEW #######################################
 
     @Override
     public void updateEventForNote( Event event )
@@ -1578,77 +1461,6 @@ public abstract class AbstractEventService
         return organisationUnits;
     }
 
-    // ####################################### NEW #######################################
-//    private boolean doValidationOfMandatoryAttributes( User user )
-//    {
-//        return user == null || !user.isAuthorized( Authorities.F_IGNORE_TRACKER_REQUIRED_VALUE_VALIDATION.getAuthority() );
-//    }
-//
-//    private boolean validatePresenceOfMandatoryDataElements(Event event, ProgramStageInstance programStageInstance, ImportSummary importSummary, boolean isSingleValueUpdate) {
-//        ValidationStrategy validationStrategy = programStageInstance.getProgramStage().getValidationStrategy();
-//
-//        if ( validationStrategy == ValidationStrategy.ON_UPDATE_AND_INSERT ||
-//            (validationStrategy == ValidationStrategy.ON_COMPLETE && event.getStatus() == EventStatus.COMPLETED) )
-//        {
-//            //I am filling the set only if I know that I will do the validation. Otherwise, it would be waste of resources
-//            Set<String>  mandatoryDataElements = programStageInstance.getProgramStage().getProgramStageDataElements().stream()
-//                .filter( psde -> psde.isCompulsory() )
-//                .map( psde -> psde.getDataElement().getUid() )
-//                .collect( Collectors.toSet() );
-//
-//            //Collect all data elements with valid data values present in the payload
-//            Set<String> presentDataElements = event.getDataValues().stream()
-//                .filter( dv -> dv != null && ( !StringUtils.isEmpty( dv.getValue().trim() ) || !dv.getValue().trim().equals( "null" ) ) )
-//                .map( dv -> dv.getDataElement() )
-//                .collect( Collectors.toSet());
-//
-//            // When the request is update, then only changed data values can be in the payload and so I should take into
-//            // account also already stored data values in order to make correct decision. Basically, this situation happens when
-//            // only 1 dataValue is updated and /events/{uid}/{dataElementUid} endpoint is leveraged.
-//            if ( isSingleValueUpdate ) {
-//                presentDataElements.addAll(
-//                    programStageInstance.getEventDataValues().stream()
-//                        .filter( dv -> !StringUtils.isEmpty( dv.getValue().trim() ))
-//                        .map( EventDataValue::getDataElement )
-//                        .collect( Collectors.toSet()));
-//            }
-//
-//            Set<String> notPresentMandatoryDataElements = Sets.difference( mandatoryDataElements, presentDataElements );
-//
-//            if ( notPresentMandatoryDataElements.size() > 0 )
-//            {
-//                notPresentMandatoryDataElements.forEach( deUid -> importSummary.getConflicts().add( new ImportConflict( deUid, "value_required_but_not_provided" ) ) );
-//                return false;
-//            }
-//        }
-//
-//        return true;
-//    }
-//
-//    private boolean validateDataValue( ProgramStageInstance programStageInstance, User user, DataElement dataElement,
-//        String value, ImportSummary importSummary )
-//    {
-//        String status = ValidationUtils.dataValueIsValid( value, dataElement );
-//        boolean validationPassed = true;
-//
-//        if ( status != null )
-//        {
-//            importSummary.getConflicts().add( new ImportConflict( dataElement.getUid(), status ) );
-//            validationPassed = false;
-//        }
-//
-//        List<String> errors = trackerAccessManager.canWrite( user, programStageInstance, dataElement );
-//
-//        if ( !errors.isEmpty() )
-//        {
-//            errors.forEach( error -> importSummary.getConflicts().add( new ImportConflict( dataElement.getUid(), error ) ) );
-//            validationPassed = false;
-//        }
-//
-//        return validationPassed;
-//    }
-    // ####################################### NEW #######################################
-
     private ImportSummary saveEvent( Program program, ProgramInstance programInstance, ProgramStage programStage,
         ProgramStageInstance programStageInstance, OrganisationUnit organisationUnit, Event event,
         ImportOptions importOptions )
@@ -1742,7 +1554,6 @@ public abstract class AbstractEventService
 
         preheatDataElementsCache( event, importOptions );
         eventDataValueService.processDataValues( programStageInstance, event, false, false, importOptions, importSummary, dataElementCache );
-//        processDataValues( programStageInstance, event, false, false, importOptions, importSummary );
         sendProgramNotification( programStageInstance, importOptions );
 
         if ( importSummary.getConflicts().size() > 0 ) {
@@ -1756,97 +1567,6 @@ public abstract class AbstractEventService
 
         return importSummary;
     }
-
-    // ####################################### NEW #######################################
-//    private void prepareDataValueForStorage( Map<String, EventDataValue> dataElementToValueMap, ProgramStageInstance programStageInstance,
-//        DataValue dataValue, DataElement dataElement, Set<EventDataValue> newDataValues, Set<EventDataValue> updatedDataValues,
-//        Set<EventDataValue> removedDataValuesDueToEmptyValue, String storedBy ) {
-//
-//        EventDataValue eventDataValue;
-//
-//        // The data value for this element was already saved so make an update
-//        if ( dataElementToValueMap.containsKey( dataValue.getDataElement() ) )
-//        {
-//            eventDataValue = dataElementToValueMap.get( dataValue.getDataElement() );
-//            eventDataValue.setStoredBy( storedBy );
-//
-//            if ( dataValue.getValue() != null && !dataValue.getValue().trim().isEmpty() )
-//            {
-//                eventDataValue.setValue( dataValue.getValue() );
-//                eventDataValue.setLastUpdated( new Date() );
-//                eventDataValue.setProvidedElsewhere( dataValue.getProvidedElsewhere() );
-//
-////                handleFileDataValueUpdate( eventDataValue, dataElement );
-////                createAndAddAudit( dataElement, programStageInstance, dataValue.getValue(), storedBy, dataValue.getProvidedElsewhere(), AuditType.UPDATE);
-//                updatedDataValues.add( eventDataValue );
-//            }
-//            else {
-//                // dataValue was present in the payload but was empty, I consider it as it should be removed from DB. This special case
-//                // is used only when it is a singleValue update. If it is regular update, then just not including it in
-//                // updatedOrNewDataValues is enough
-////                handleFileDataValueDelete( eventDataValue, dataElement );
-////                createAndAddAudit( dataElement, programStageInstance, dataValue.getValue(), storedBy, dataValue.getProvidedElsewhere(), AuditType.DELETE);
-//                removedDataValuesDueToEmptyValue.add( eventDataValue );
-//            }
-//        }
-//        // Value is not present in DB so consider it a new and save if it is valid
-//        else if ( dataValue.getValue() != null && !dataValue.getValue().trim().isEmpty() )
-//        {
-//            eventDataValue = new EventDataValue( dataElement.getUid(), dataValue.getValue() );
-//            eventDataValue.setAutoFields();
-//            eventDataValue.setStoredBy( storedBy );
-//            eventDataValue.setProvidedElsewhere( dataValue.getProvidedElsewhere() );
-//
-////            handleFileDataValueSave( eventDataValue, dataElement );
-////            createAndAddAudit( dataElement, programStageInstance, dataValue.getValue(), storedBy, dataValue.getProvidedElsewhere(), AuditType.CREATE);
-//            newDataValues.add( eventDataValue );
-//        }
-//    }
-    // ####################################### NEW #######################################
-
-//    private void prepareDataValueForStorage( Set<EventDataValue> updatedOrNewDataValues, Set<EventDataValue> removedDataValuesDueToEmptyValue,
-//        Map<String, EventDataValue> dataElementToValueMap, ProgramStageInstance programStageInstance, DataValue dataValue,
-//        DataElement dataElement, String storedBy ) {
-//        EventDataValue eventDataValue;
-//
-//        // The data value for this element was already saved so make an update
-//        if ( dataElementToValueMap.containsKey( dataValue.getDataElement() ) )
-//        {
-//            eventDataValue = dataElementToValueMap.get( dataValue.getDataElement() );
-//
-//            if ( dataValue.getValue() != null && !dataValue.getValue().trim().isEmpty() )
-//            {
-//                eventDataValue.setValue( dataValue.getValue() );
-//                eventDataValue.setLastUpdated( new Date() );
-//                eventDataValue.setStoredBy( storedBy );
-//                eventDataValue.setProvidedElsewhere( dataValue.getProvidedElsewhere() );
-//
-//                handleFileDataValueUpdate( eventDataValue, dataElement );
-//                createAndAddAudit( dataElement, programStageInstance, dataValue.getValue(), storedBy, dataValue.getProvidedElsewhere(), AuditType.UPDATE);
-//                updatedOrNewDataValues.add( eventDataValue );
-//            }
-//            else {
-//                // dataValue was present in the payload but was empty, I consider it as it should be removed from DB. This special case
-//                // is used only when it is a singleValue update. If it is regular update, then just not including it in
-//                // updatedOrNewDataValues is enough
-//                handleFileDataValueDelete( eventDataValue, dataElement );
-//                createAndAddAudit( dataElement, programStageInstance, dataValue.getValue(), storedBy, dataValue.getProvidedElsewhere(), AuditType.DELETE);
-//                removedDataValuesDueToEmptyValue.add( eventDataValue );
-//            }
-//        }
-//        // Value is not present in DB so consider it a new and save if it is valid
-//        else if ( dataValue.getValue() != null && !dataValue.getValue().trim().isEmpty() )
-//        {
-//            eventDataValue = new EventDataValue( dataElement.getUid(), dataValue.getValue() );
-//            eventDataValue.setAutoFields();
-//            eventDataValue.setStoredBy( storedBy );
-//            eventDataValue.setProvidedElsewhere( dataValue.getProvidedElsewhere() );
-//
-//            handleFileDataValueSave( eventDataValue, dataElement );
-//            createAndAddAudit( dataElement, programStageInstance, dataValue.getValue(), storedBy, dataValue.getProvidedElsewhere(), AuditType.CREATE);
-//            updatedOrNewDataValues.add( eventDataValue );
-//        }
-//    }
 
     private void sendProgramNotification( ProgramStageInstance programStageInstance, ImportOptions importOptions )
     {
@@ -2343,77 +2063,4 @@ public abstract class AbstractEventService
 
         importOptions.setUser( userService.getUser( importOptions.getUser().getId() ) );
     }
-
-    private void createAndAddAudit( DataElement dataElement, ProgramStageInstance programStageInstance, String dataValue, String username, boolean providedElsewhere, AuditType auditType )
-    {
-        TrackedEntityDataValueAudit dataValueAudit = new TrackedEntityDataValueAudit( dataElement, programStageInstance, dataValue, username, providedElsewhere, auditType );
-        dataValueAuditService.addTrackedEntityDataValueAudit( dataValueAudit );
-    }
-
-//    private void  handleFileDataValueUpdate( EventDataValue dataValue, DataElement dataElement )
-//    {
-//        String previousFileResourceUid = dataValue.getAuditValue();
-//
-//        if ( previousFileResourceUid == null || previousFileResourceUid.equals( dataValue.getValue() ) )
-//        {
-//            return;
-//        }
-//
-//        FileResource fileResource = fetchFileResource( dataValue, dataElement );
-//
-//        if ( fileResource == null )
-//        {
-//            return;
-//        }
-//
-//        fileResourceService.deleteFileResource( previousFileResourceUid );
-//
-//        setAssigned( fileResource );
-//    }
-//
-//    /**
-//     * Update FileResource with 'assigned' status.
-//     */
-//    private void handleFileDataValueSave( EventDataValue dataValue, DataElement dataElement )
-//    {
-//        FileResource fileResource = fetchFileResource( dataValue, dataElement );
-//
-//        if ( fileResource == null )
-//        {
-//            return;
-//        }
-//
-//        setAssigned( fileResource );
-//    }
-//
-//    /**
-//     * Delete associated FileResource if it exists.
-//     */
-//    private void handleFileDataValueDelete( EventDataValue dataValue, DataElement dataElement )
-//    {
-//        FileResource fileResource = fetchFileResource( dataValue, dataElement );
-//
-//        if ( fileResource == null )
-//        {
-//            return;
-//        }
-//
-//        fileResourceService.deleteFileResource( fileResource.getUid() );
-//    }
-//
-//    private FileResource fetchFileResource( EventDataValue dataValue, DataElement dataElement )
-//    {
-//        if ( !dataElement.isFileType() )
-//        {
-//            return null;
-//        }
-//
-//        return fileResourceService.getFileResource( dataValue.getValue() );
-//    }
-//
-//    private void setAssigned( FileResource fileResource )
-//    {
-//        fileResource.setAssigned( true );
-//        fileResourceService.updateFileResource( fileResource );
-//    }
 }
