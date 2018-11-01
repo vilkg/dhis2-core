@@ -34,8 +34,22 @@ import org.hisp.dhis.program.ProgramStageInstance;
 
 import java.util.Map;
 
+/**
+ * @author David Katuscak
+ */
 public interface EventDataValueService
 {
+    /**
+     * Process the data values: validates and then saves/updates/deletes data values.
+     *
+     * @param programStageInstance The ProgramStageInstance the EventDataValues are related to
+     * @param event Event that holds the data values to process
+     * @param isUpdate specifies whether a request is an update request
+     * @param singleValue Specifies whether request updates only a single value or not
+     * @param importOptions ImportOptions
+     * @param importSummary ImportSummary
+     * @param dataElementsCache Cache with DataElements related to EventDataValues that are being updated
+     */
     void processDataValues( ProgramStageInstance programStageInstance, Event event, boolean isUpdate,
         boolean singleValue, ImportOptions importOptions, ImportSummary importSummary, Map<String, DataElement> dataElementsCache );
 }

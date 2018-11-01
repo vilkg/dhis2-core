@@ -40,15 +40,17 @@ import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueAudit;
 import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueAuditService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author David Katuscak
  */
+@Transactional
 public class DefaultEventDataValueService implements EventDataValueService
 {
     // -------------------------------------------------------------------------
@@ -70,6 +72,10 @@ public class DefaultEventDataValueService implements EventDataValueService
     @Autowired
     private DataElementService dataElementService;
 
+    // -------------------------------------------------------------------------
+    // Implementation methods
+    // -------------------------------------------------------------------------
+
     @Override
     public void persistDataValues( Set<EventDataValue> newDataValues, Set<EventDataValue> updatedDataValues,
         Set<EventDataValue> removedDataValues, Map<String, DataElement> dataElementsCache, ProgramStageInstance programStageInstance,
@@ -80,9 +86,8 @@ public class DefaultEventDataValueService implements EventDataValueService
         if ( singleValue ) {
             //If it is only a single value update, I don't won't to miss the values that are missing in the payload but already present in the DB
             Set<EventDataValue> changedDataValues = Sets.union( updatedOrNewDataValues, removedDataValues );
-            Set<EventDataValue> unchangedDataValues = Sets.difference( programStageInstance.getEventDataValues(), changedDataValues );
-            programStageInstance.setEventDataValues( updatedOrNewDataValues );
-            programStageInstance.getEventDataValues().addAll( unchangedDataValues );
+            programStageInstance.getEventDataValues().removeAll( changedDataValues );
+            programStageInstance.getEventDataValues().addAll( updatedOrNewDataValues );
         }
         else {
             programStageInstance.setEventDataValues( updatedOrNewDataValues );
@@ -97,230 +102,183 @@ public class DefaultEventDataValueService implements EventDataValueService
     @Override
     public void saveEventDataValue( ProgramStageInstance programStageInstance, EventDataValue eventDataValue )
     {
-
         if ( !StringUtils.isEmpty( eventDataValue.getValue() ) )
         {
-            if ( StringUtils.isEmpty( eventDataValue.getStoredBy() ) )
-            {
-                eventDataValue.setStoredBy( currentUserService.getCurrentUsername() );
-            }
+            eventDataValue.setAutoFields();
 
-            if ( StringUtils.isEmpty( eventDataValue.getDataElement() ) )
-            {
-                throw new IllegalQueryException( "Data element is null or empty" );
-            }
-            DataElement dataElement = dataElementService.getDataElement( eventDataValue.getDataElement() );
-
-            if ( dataElement == null ) {
-                throw new IllegalStateException( "Given data element (" +  eventDataValue.getDataElement() + ") does not exist" );
-            }
-
-            String result = ValidationUtils.dataValueIsValid( eventDataValue.getValue(), dataElement.getValueType() );
-
+            String result = validateEventDataValue( eventDataValue );
             if ( result != null )
             {
-                throw new IllegalQueryException( "Value is not valid:  " + result );
+                throw new IllegalQueryException( result );
             }
 
-            if ( dataElement.isFileType() )
-            {
-                handleFileDataValueSave( eventDataValue, dataElement );
-            }
+            DataElement dataElement = dataElementService.getDataElement( eventDataValue.getDataElement() );
+            handleFileDataValueSave( eventDataValue, dataElement );
 
             programStageInstance.getEventDataValues().add( eventDataValue );
             createAndAddAudit( eventDataValue, dataElement, programStageInstance, AuditType.CREATE );
+
             programStageInstanceService.updateProgramStageInstance( programStageInstance );
         }
     }
 
-    @Override public void saveEventDataValues( ProgramStageInstance programStageInstance, Collection<EventDataValue> eventDataValues )
+    @Override
+    public void saveEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues )
     {
+        Set<EventDataValue> filteredEventDataValues = filterOutEmptyDataValues( eventDataValues );
 
+        if( !filteredEventDataValues.isEmpty() )
+        {
+            validateEventDataValues( filteredEventDataValues );
+
+            for ( EventDataValue eventDataValue : filteredEventDataValues )
+            {
+                DataElement dataElement = dataElementService.getDataElement( eventDataValue.getDataElement() );
+                createAndAddAudit( eventDataValue, dataElement, programStageInstance, AuditType.CREATE );
+                handleFileDataValueSave( eventDataValue, dataElement );
+            }
+
+            programStageInstance.getEventDataValues().addAll( filteredEventDataValues );
+            programStageInstanceService.updateProgramStageInstance( programStageInstance );
+        }
     }
 
-    @Override public void updateEventDataValue( ProgramStageInstance programStageInstance, EventDataValue eventDataValue )
+    @Override
+    public void updateEventDataValue( ProgramStageInstance programStageInstance, EventDataValue eventDataValue )
     {
+        //TODO: If we will go for json string format no. 1, then this can be simplified even more and done directly by calling DB query
 
+        if ( StringUtils.isEmpty( eventDataValue.getValue() ) )
+        {
+            deleteEventDataValue( programStageInstance, eventDataValue );
+        }
+        else {
+            eventDataValue.setAutoFields();
+
+            String result = validateEventDataValue( eventDataValue );
+            if ( result != null )
+            {
+                throw new IllegalQueryException( result );
+            }
+
+            DataElement dataElement = dataElementService.getDataElement( eventDataValue.getDataElement() );
+            handleFileDataValueUpdate( eventDataValue, dataElement );
+
+            programStageInstance.getEventDataValues().remove( eventDataValue );
+            programStageInstance.getEventDataValues().add( eventDataValue );
+            createAndAddAudit( eventDataValue, dataElement, programStageInstance, AuditType.UPDATE );
+
+            programStageInstanceService.updateProgramStageInstance( programStageInstance );
+        }
     }
 
-    @Override public void updateEventDataValues( ProgramStageInstance programStageInstance, Collection<EventDataValue> eventDataValues )
+    @Override public void updateEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues )
     {
+        Set<EventDataValue> eventDataValuesWithEmptyValues = eventDataValues.stream().filter( dv -> StringUtils.isEmpty( dv.getValue() ) ).collect( Collectors.toSet());
+        deleteEventDataValues( programStageInstance, eventDataValuesWithEmptyValues );
 
+        Set<EventDataValue> filteredEventDataValues = filterOutEmptyDataValues( eventDataValues );
+
+        if( !filteredEventDataValues.isEmpty() )
+        {
+            validateEventDataValues( filteredEventDataValues );
+
+            for ( EventDataValue eventDataValue : filteredEventDataValues )
+            {
+                DataElement dataElement = dataElementService.getDataElement( eventDataValue.getDataElement() );
+                createAndAddAudit( eventDataValue, dataElement, programStageInstance, AuditType.UPDATE );
+                handleFileDataValueUpdate( eventDataValue, dataElement );
+            }
+
+            //Need to do this as adding elements that are already added (so overwriting) is non-deterministic / not defined
+            programStageInstance.getEventDataValues().removeAll( filteredEventDataValues );
+            programStageInstance.getEventDataValues().addAll( filteredEventDataValues );
+            programStageInstanceService.updateProgramStageInstance( programStageInstance );
+        }
     }
 
     @Override public void deleteEventDataValue( ProgramStageInstance programStageInstance, EventDataValue eventDataValue )
     {
+        if ( StringUtils.isEmpty( eventDataValue.getDataElement() ) )
+        {
+            throw new  IllegalQueryException( "Data element is null or empty" );
+        }
 
+        DataElement dataElement = dataElementService.getDataElement( eventDataValue.getDataElement() );
+        if ( dataElement == null ) {
+            throw new  IllegalQueryException( "Given data element (" +  eventDataValue.getDataElement() + ") does not exist" );
+        }
+
+        createAndAddAudit( eventDataValue, dataElement, programStageInstance, AuditType.DELETE );
+        handleFileDataValueDelete( eventDataValue, dataElement );
+        programStageInstance.getEventDataValues().remove( eventDataValue );
+        programStageInstanceService.updateProgramStageInstance( programStageInstance );
     }
 
-    @Override public void deleteEventDataValues( ProgramStageInstance programStageInstance, Collection<EventDataValue> eventDataValues )
+    @Override public void deleteEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues )
     {
+        for ( EventDataValue eventDataValue : eventDataValues ) {
+            if ( StringUtils.isEmpty( eventDataValue.getDataElement() ) )
+            {
+                throw new  IllegalQueryException( "Data element is null or empty" );
+            }
 
+            DataElement dataElement = dataElementService.getDataElement( eventDataValue.getDataElement() );
+            if ( dataElement == null ) {
+                throw new  IllegalQueryException( "Given data element (" +  eventDataValue.getDataElement() + ") does not exist" );
+            }
+        }
+
+        for ( EventDataValue eventDataValue : eventDataValues ) {
+            DataElement dataElement = dataElementService.getDataElement( eventDataValue.getDataElement() );
+            createAndAddAudit( eventDataValue, dataElement, programStageInstance, AuditType.DELETE );
+            handleFileDataValueDelete( eventDataValue, dataElement );
+        }
+
+        programStageInstance.getEventDataValues().removeAll( eventDataValues );
+        programStageInstanceService.updateProgramStageInstance( programStageInstance );
     }
-
-    @Override public void deleteEventDataValue( ProgramStageInstance programStageInstance )
-    {
-
-    }
-
-    // -------------------------------------------------------------------------
-    // Implementation methods
-    // -------------------------------------------------------------------------
-
-//      // Safe to remove - all usages replaced - audit logging need to be finished. Not completely done yet (e.g. PdfDataEntryFormImportUtil)
-//      // Also the file handling need to implemented/fixed/checked.
-//    @Override
-//    public void saveTrackedEntityDataValue( TrackedEntityDataValue trackedEntityDataValue )
-//    {
-//        trackedEntityDataValue.setAutoFields();
-//
-//        if ( !StringUtils.isEmpty( trackedEntityDataValue.getValue() ) )
-//        {
-//            if ( StringUtils.isEmpty( trackedEntityDataValue.getStoredBy() ) )
-//            {
-//                trackedEntityDataValue.setStoredBy( currentUserService.getCurrentUsername() );
-//            }
-//
-//            if ( trackedEntityDataValue.getDataElement() == null || trackedEntityDataValue.getDataElement().getValueType() == null )
-//            {
-//                throw new IllegalQueryException( "Data element or type is null or empty" );
-//            }
-//
-//            String result = dataValueIsValid( trackedEntityDataValue.getValue(), trackedEntityDataValue.getDataElement().getValueType() );
-//
-//            if ( result != null )
-//            {
-//                throw new IllegalQueryException( "Value is not valid:  " + result );
-//            }
-//
-//            if ( trackedEntityDataValue.getDataElement().isFileType() )
-//            {
-//                handleFileDataValueSave( trackedEntityDataValue );
-//            }
-//
-//            dataValueStore.saveVoid( trackedEntityDataValue );
-//        }
-//    }
-
-//      // Safe to remove - all usages replaced - audit logging need to be finished. Not completely done yet (e.g. PdfDataEntryFormImportUtil)
-//      // Also the file handling need to implemented/fixed/checked.
-//    @Override
-//    public void updateTrackedEntityDataValue( TrackedEntityDataValue trackedEntityDataValue )
-//    {
-//        trackedEntityDataValue.setAutoFields();
-//
-//        if ( StringUtils.isEmpty( trackedEntityDataValue.getValue() ) )
-//        {
-//            deleteTrackedEntityDataValue( trackedEntityDataValue );
-//        }
-//        else
-//        {
-//            if ( StringUtils.isEmpty( trackedEntityDataValue.getStoredBy() ) )
-//            {
-//                trackedEntityDataValue.setStoredBy( currentUserService.getCurrentUsername() );
-//            }
-//
-//            if ( trackedEntityDataValue.getDataElement() == null || trackedEntityDataValue.getDataElement().getValueType() == null )
-//            {
-//                throw new IllegalQueryException( "Data element or type is null or empty" );
-//            }
-//
-//            String result = dataValueIsValid( trackedEntityDataValue.getValue(), trackedEntityDataValue.getDataElement().getValueType() );
-//
-//            if ( result != null )
-//            {
-//                throw new IllegalQueryException( "Value is not valid:  " + result );
-//            }
-//
-//            createAndAddAudit( trackedEntityDataValue, trackedEntityDataValue.getStoredBy(), AuditType.UPDATE );
-//            handleFileDataValueUpdate( trackedEntityDataValue );
-//
-//            dataValueStore.update( trackedEntityDataValue );
-//        }
-//    }
-
-//      // Safe to remove - all usages replaced - the file handling needs to be implemented/fixed/checked
-//    @Override
-//    public void deleteTrackedEntityDataValue( TrackedEntityDataValue dataValue )
-//    {
-//        createAndAddAudit( dataValue, currentUserService.getCurrentUsername(), AuditType.DELETE );
-//
-//        handleFileDataValueDelete( dataValue );
-//
-//        dataValueStore.delete( dataValue );
-//    }
-
-//      // Safe to remove - no usage at all
-//    @Override
-//    public void deleteTrackedEntityDataValue( ProgramStageInstance programStageInstance )
-//    {
-//        List<TrackedEntityDataValue> dataValues = dataValueStore.get( programStageInstance );
-//        String username = currentUserService.getCurrentUsername();
-//
-//        for ( TrackedEntityDataValue dataValue : dataValues )
-//        {
-//            createAndAddAudit( dataValue, username, AuditType.DELETE );
-//            handleFileDataValueDelete( dataValue );
-//        }
-//
-//        dataValueStore.delete( programStageInstance );
-//    }
-
-//      // Safe to remove - test/s should be rewritten
-//    @Override
-//    public List<TrackedEntityDataValue> getTrackedEntityDataValues( ProgramStageInstance programStageInstance )
-//    {
-//        return dataValueStore.get( programStageInstance );
-//    }
-
-//      // Safe to remove - logic is re-implemented, so safe to take it away
-//    @Override
-//    public List<TrackedEntityDataValue> getTrackedEntityDataValuesForSynchronization( ProgramStageInstance programStageInstance )
-//    {
-//        return dataValueStore.getTrackedEntityDataValuesForSynchronization( programStageInstance );
-//    }
-
-//      // Safe to remove - not used at all - only in tests so doesn't make sense
-//    @Override
-//    public List<TrackedEntityDataValue> getTrackedEntityDataValues( ProgramStageInstance programStageInstance,
-//        Collection<DataElement> dataElements )
-//    {
-//        return dataValueStore.get( programStageInstance, dataElements );
-//    }
-
-//      // Safe to remove - not used at all - only in tests so doesn't make sense
-//    @Override
-//    public List<TrackedEntityDataValue> getTrackedEntityDataValues( Collection<ProgramStageInstance> programStageInstances )
-//    {
-//        return dataValueStore.get( programStageInstances );
-//    }
-
-//      // Safe to remove - not used at all - only in tests so doesn't make sense
-//    @Override
-//    public List<TrackedEntityDataValue> getTrackedEntityDataValues( DataElement dataElement )
-//    {
-//        return dataValueStore.get( dataElement );
-//    }
-
-//      // Safe to remove - not used at all - only in 1 test and even there in wrong way
-//    @Override
-//    public List<TrackedEntityDataValue> getTrackedEntityDataValues( TrackedEntityInstance entityInstance,
-//        Collection<DataElement> dataElements, Date startDate, Date endDate )
-//    {
-//        return dataValueStore.get( entityInstance, dataElements, startDate, endDate );
-//    }
-
-//      // Safe to remove - maybe tests can be rewritten
-//    @Override
-//    public TrackedEntityDataValue getTrackedEntityDataValue( ProgramStageInstance programStageInstance,
-//        DataElement dataElement )
-//    {
-//        return dataValueStore.get( programStageInstance, dataElement );
-//    }
 
     // -------------------------------------------------------------------------
     // Supportive methods
     // -------------------------------------------------------------------------
+
+    private Set<EventDataValue> filterOutEmptyDataValues( Set<EventDataValue> eventDataValues ) {
+        return eventDataValues.stream().filter( dv -> !StringUtils.isEmpty( dv.getValue() ) ).collect( Collectors.toSet());
+    }
+
+    private String validateEventDataValue( EventDataValue eventDataValue ) {
+
+        if ( StringUtils.isEmpty( eventDataValue.getStoredBy() ) )
+        {
+            eventDataValue.setStoredBy( currentUserService.getCurrentUsername() );
+        }
+
+        if ( StringUtils.isEmpty( eventDataValue.getDataElement() ) )
+        {
+            return "Data element is null or empty";
+        }
+
+        DataElement dataElement = dataElementService.getDataElement( eventDataValue.getDataElement() );
+        if ( dataElement == null ) {
+            return "Given data element (" +  eventDataValue.getDataElement() + ") does not exist" ;
+        }
+
+        String result = ValidationUtils.dataValueIsValid( eventDataValue.getValue(), dataElement.getValueType() );
+
+        return result == null ? null : "Value is not valid:  " + result;
+    }
+
+    private void validateEventDataValues( Set<EventDataValue> eventDataValues ) {
+
+        String result;
+        for ( EventDataValue eventDataValue : eventDataValues ) {
+            result = validateEventDataValue( eventDataValue );
+            if ( result != null) {
+                throw new IllegalQueryException( result );
+            }
+        }
+    }
 
     private void auditDataValuesChanges( Set<EventDataValue> newDataValues, Set<EventDataValue> updatedDataValues,
         Set<EventDataValue> removedDataValues, Map<String, DataElement> dataElementsCache, ProgramStageInstance programStageInstance ) {

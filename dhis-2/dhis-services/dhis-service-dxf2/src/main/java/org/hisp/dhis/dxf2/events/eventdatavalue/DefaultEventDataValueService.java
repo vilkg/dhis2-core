@@ -46,6 +46,7 @@ import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import java.util.Collection;
@@ -56,6 +57,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * @author David Katuscak
+ */
+@Transactional
 public class DefaultEventDataValueService implements EventDataValueService
 {
     @Autowired
@@ -133,16 +138,12 @@ public class DefaultEventDataValueService implements EventDataValueService
                 eventDataValue.setLastUpdated( new Date() );
                 eventDataValue.setProvidedElsewhere( dataValue.getProvidedElsewhere() );
 
-//                handleFileDataValueUpdate( eventDataValue, dataElement );
-//                createAndAddAudit( dataElement, programStageInstance, dataValue.getValue(), storedBy, dataValue.getProvidedElsewhere(), AuditType.UPDATE);
                 updatedDataValues.add( eventDataValue );
             }
             else {
                 // dataValue was present in the payload but was empty, I consider it as it should be removed from DB. This special case
                 // is used only when it is a singleValue update. If it is regular update, then just not including it in
                 // updatedOrNewDataValues is enough
-//                handleFileDataValueDelete( eventDataValue, dataElement );
-//                createAndAddAudit( dataElement, programStageInstance, dataValue.getValue(), storedBy, dataValue.getProvidedElsewhere(), AuditType.DELETE);
                 removedDataValuesDueToEmptyValue.add( eventDataValue );
             }
         }
@@ -154,8 +155,6 @@ public class DefaultEventDataValueService implements EventDataValueService
             eventDataValue.setStoredBy( storedBy );
             eventDataValue.setProvidedElsewhere( dataValue.getProvidedElsewhere() );
 
-//            handleFileDataValueSave( eventDataValue, dataElement );
-//            createAndAddAudit( dataElement, programStageInstance, dataValue.getValue(), storedBy, dataValue.getProvidedElsewhere(), AuditType.CREATE);
             newDataValues.add( eventDataValue );
         }
     }

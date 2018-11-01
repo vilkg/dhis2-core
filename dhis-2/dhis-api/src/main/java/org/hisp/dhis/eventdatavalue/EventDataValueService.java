@@ -29,7 +29,6 @@ package org.hisp.dhis.eventdatavalue;/*
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.program.ProgramStageInstance;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -65,7 +64,7 @@ public interface EventDataValueService
      * @param programStageInstance the ProgramStageInstance that EventDataValues should be added to
      * @param eventDataValues the Collection of EventDataValues to add
      */
-    void saveEventDataValues( ProgramStageInstance programStageInstance, Collection<EventDataValue> eventDataValues );
+    void saveEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues );
 
     /**
      * Updates an {@link EventDataValue}
@@ -81,7 +80,7 @@ public interface EventDataValueService
      * @param programStageInstance the ProgramStageInstance that EventDataValues belongs to
      * @param eventDataValues the Collection of EventDataValues to update
      */
-    void updateEventDataValues( ProgramStageInstance programStageInstance, Collection<EventDataValue> eventDataValues );
+    void updateEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues );
 
     /**
      * Deletes a {@link EventDataValue} from {@link ProgramStageInstance}
@@ -96,12 +95,5 @@ public interface EventDataValueService
      * @param programStageInstance the ProgramStageInstance to delete EventDataValues from
      * @param eventDataValues the Collection of EventDataValues to delete
      */
-    void deleteEventDataValues( ProgramStageInstance programStageInstance, Collection<EventDataValue> eventDataValues );
-
-    /**
-     * Deletes all {@link EventDataValue} of {@link ProgramStageInstance}
-     *
-     * @param programStageInstance The {@link ProgramStageInstance}
-     */
-    void deleteEventDataValue( ProgramStageInstance programStageInstance );
+    void deleteEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues );
 }

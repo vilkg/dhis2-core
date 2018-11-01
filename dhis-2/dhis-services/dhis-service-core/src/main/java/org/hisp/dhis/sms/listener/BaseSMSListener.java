@@ -34,9 +34,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.category.CategoryService;
 import org.hisp.dhis.eventdatavalue.EventDataValue;
+import org.hisp.dhis.eventdatavalue.EventDataValueService;
 import org.hisp.dhis.message.MessageSender;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
-import org.hisp.dhis.program.*;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceService;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceService;
+import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.sms.command.SMSCommand;
 import org.hisp.dhis.sms.command.code.SMSCode;
 import org.hisp.dhis.sms.incoming.IncomingSms;
@@ -44,14 +49,20 @@ import org.hisp.dhis.sms.incoming.IncomingSmsListener;
 import org.hisp.dhis.sms.incoming.IncomingSmsService;
 import org.hisp.dhis.sms.incoming.SmsMessageStatus;
 import org.hisp.dhis.system.util.SmsUtils;
-import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -89,7 +100,7 @@ public abstract class BaseSMSListener implements IncomingSmsListener
     private CategoryService dataElementCategoryService;
 
     @Autowired
-    private TrackedEntityDataValueService trackedEntityDataValueService;
+    private EventDataValueService eventDataValueService;
 
     @Autowired
     private ProgramStageInstanceService programStageInstanceService;
@@ -265,15 +276,16 @@ public abstract class BaseSMSListener implements IncomingSmsListener
 
         programStageInstanceService.addProgramStageInstance( programStageInstance );
 
+        Set<EventDataValue> eventDataValues = new HashSet<>();
         for ( SMSCode smsCode : smsCommand.getCodes() )
         {
-            EventDataValue dataValueEvent = new EventDataValue( smsCode.getDataElement().getUid(), commandValuePairs.get( smsCode.getCode() ) );
-            dataValueEvent.setAutoFields();
+            EventDataValue eventDataValue = new EventDataValue( smsCode.getDataElement().getUid(), commandValuePairs.get( smsCode.getCode() ) );
+            eventDataValue.setAutoFields();
 
-            programStageInstance.getEventDataValues().add( dataValueEvent );
+            eventDataValues.add( eventDataValue );
         }
 
-        programStageInstanceService.updateProgramStageInstance( programStageInstance );
+        eventDataValueService.saveEventDataValues( programStageInstance, eventDataValues );
 
         update( sms, SmsMessageStatus.PROCESSED, true );
 

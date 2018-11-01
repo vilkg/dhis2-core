@@ -36,6 +36,7 @@ import org.hisp.dhis.common.IdentifiableObjectManager;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.eventdatavalue.EventDataValue;
+import org.hisp.dhis.eventdatavalue.EventDataValueService;
 import org.hisp.dhis.message.MessageConversationParams;
 import org.hisp.dhis.message.MessageService;
 import org.hisp.dhis.notification.NotificationMessage;
@@ -43,13 +44,18 @@ import org.hisp.dhis.notification.ProgramNotificationMessageRenderer;
 import org.hisp.dhis.notification.ProgramStageNotificationMessageRenderer;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.outboundmessage.BatchResponseStatus;
-import org.hisp.dhis.program.*;
+import org.hisp.dhis.program.Program;
+import org.hisp.dhis.program.ProgramInstance;
+import org.hisp.dhis.program.ProgramInstanceStore;
+import org.hisp.dhis.program.ProgramStage;
+import org.hisp.dhis.program.ProgramStageInstance;
+import org.hisp.dhis.program.ProgramStageInstanceStore;
+import org.hisp.dhis.program.ProgramTrackedEntityAttribute;
 import org.hisp.dhis.program.message.ProgramMessage;
 import org.hisp.dhis.program.message.ProgramMessageService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
-import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.junit.Before;
@@ -59,10 +65,21 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import java.util.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @Author Zubair Asghar.
@@ -102,6 +119,9 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
     @Mock
     private ProgramStageInstanceStore programStageInstanceStore;
 
+    @Mock
+    private EventDataValueService eventDataValueService;
+
     @InjectMocks
     private DefaultProgramNotificationService programNotificationService;
 
@@ -131,8 +151,6 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
 
     private DataElement dataElement;
     private DataElement dataElementEmail;
-    private TrackedEntityDataValue dataValue;
-    private TrackedEntityDataValue dataValueEmail;
 
     private EventDataValue eventDataValue;
     private EventDataValue eventDataValueEmail;
@@ -583,28 +601,14 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
         programStageInstance.setProgramInstance( programInstance );
         programStageInstance.setOrganisationUnit( lvlTwoLeftLeft );
         programStageInstance.setProgramStage( programStage );
-        dataValue = new TrackedEntityDataValue();
-        dataValue.setAutoFields();
-        dataValue.setDataElement( dataElement );
-        dataValue.setValue( DE_PHONE_NUMBER );
-
-        eventDataValue = new EventDataValue();
+        eventDataValue = new EventDataValue( dataElement.getUid(), DE_PHONE_NUMBER );
         eventDataValue.setAutoFields();
-        eventDataValue.setDataElement( dataElement.getUid() );
-        eventDataValue.setValue( DE_PHONE_NUMBER );
 
-        dataValueEmail = new TrackedEntityDataValue();
-        dataValueEmail.setAutoFields();
-        dataValueEmail.setDataElement( dataElementEmail );
-        dataValueEmail.setValue( DE_EMAIL );
-
-        eventDataValueEmail = new EventDataValue();
+        eventDataValueEmail = new EventDataValue( dataElementEmail.getUid(), DE_EMAIL );
         eventDataValueEmail.setAutoFields();
-        eventDataValueEmail.setDataElement( dataElementEmail.getUid() );
-        eventDataValueEmail.setValue( DE_EMAIL );
 
-        programStageInstance.getDataValues().add( dataValue );
-        programStageInstance.getEventDataValues().add( eventDataValue );
+        eventDataValueService.saveEventDataValue( programStageInstance, eventDataValue );
+        eventDataValueService.saveEventDataValue( programStageInstance, eventDataValueEmail );
 
         // lists returned by stubs
         programStageInstances.add( programStageInstance );

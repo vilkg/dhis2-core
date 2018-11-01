@@ -28,20 +28,6 @@ package org.hisp.dhis.program;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import static org.hisp.dhis.program.ProgramIndicator.KEY_ATTRIBUTE;
-import static org.hisp.dhis.program.ProgramIndicator.KEY_DATAELEMENT;
-import static org.hisp.dhis.program.ProgramIndicator.KEY_PROGRAM_VARIABLE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashSet;
-import java.util.Set;
-
 import org.hisp.dhis.DhisSpringTest;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.constant.Constant;
@@ -49,6 +35,8 @@ import org.hisp.dhis.constant.ConstantService;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementDomain;
 import org.hisp.dhis.dataelement.DataElementService;
+import org.hisp.dhis.eventdatavalue.EventDataValue;
+import org.hisp.dhis.eventdatavalue.EventDataValueService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.PeriodType;
@@ -59,10 +47,22 @@ import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValue;
 import org.hisp.dhis.trackedentityattributevalue.TrackedEntityAttributeValueService;
-import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValue;
-import org.hisp.dhis.trackedentitydatavalue.TrackedEntityDataValueService;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashSet;
+import java.util.Set;
+
+import static org.hisp.dhis.program.ProgramIndicator.KEY_ATTRIBUTE;
+import static org.hisp.dhis.program.ProgramIndicator.KEY_DATAELEMENT;
+import static org.hisp.dhis.program.ProgramIndicator.KEY_PROGRAM_VARIABLE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Chau Thu Tran
@@ -94,7 +94,7 @@ public class ProgramIndicatorServiceTest
     private ProgramInstanceService programInstanceService;
 
     @Autowired
-    private TrackedEntityDataValueService dataValueService;
+    private EventDataValueService eventDataValueService;
 
     @Autowired
     private DataElementService dataElementService;
@@ -251,15 +251,15 @@ public class ProgramIndicatorServiceTest
         programInstance.setProgramStageInstances( programStageInstances );
         programInstance.setProgram( programA );
 
-        TrackedEntityDataValue dataValueA = new TrackedEntityDataValue( stageInstanceA, deA, "3" );
-        TrackedEntityDataValue dataValueB = new TrackedEntityDataValue( stageInstanceA, deB, "1" );
-        TrackedEntityDataValue dataValueC = new TrackedEntityDataValue( stageInstanceB, deA, "5" );
-        TrackedEntityDataValue dataValueD = new TrackedEntityDataValue( stageInstanceB, deB, "7" );
+        EventDataValue dataValueA = new EventDataValue( deA.getUid(), "3" );
+        EventDataValue dataValueB = new EventDataValue( deB.getUid(), "1" );
+        EventDataValue dataValueC = new EventDataValue( deA.getUid(), "5" );
+        EventDataValue dataValueD = new EventDataValue( deB.getUid(), "7" );
 
-        dataValueService.saveTrackedEntityDataValue( dataValueA );
-        dataValueService.saveTrackedEntityDataValue( dataValueB );
-        dataValueService.saveTrackedEntityDataValue( dataValueC );
-        dataValueService.saveTrackedEntityDataValue( dataValueD );
+        eventDataValueService.saveEventDataValue( stageInstanceA, dataValueA );
+        eventDataValueService.saveEventDataValue( stageInstanceA, dataValueB );
+        eventDataValueService.saveEventDataValue( stageInstanceB, dataValueC );
+        eventDataValueService.saveEventDataValue( stageInstanceB, dataValueD );
 
         // ---------------------------------------------------------------------
         // Constant
