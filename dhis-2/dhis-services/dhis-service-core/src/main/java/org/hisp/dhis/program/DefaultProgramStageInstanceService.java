@@ -99,8 +99,6 @@ public class DefaultProgramStageInstanceService
 
     public void deleteProgramStageInstance( ProgramStageInstance programStageInstance, boolean forceDelete )
     {
-        dataValueAuditService.deleteTrackedEntityDataValueAudits( programStageInstance );
-
         if ( forceDelete )
         {
             programStageInstanceStore.delete( programStageInstance );
