@@ -148,15 +148,20 @@ public class DefaultAnalyticsTableService
         
         clock.logTime( "Populated analytics tables" );
         notifier.notify( jobId, "Invoking analytics table hooks" );
-                
+
         tableManager.invokeAnalyticsTableSqlHooks();
-        
+
         clock.logTime( "Invoked analytics table hooks" );
         notifier.notify( jobId, "Applying aggregation levels" );
         
         applyAggregationLevels( tables );
-        
+
         clock.logTime( "Applied aggregation levels" );
+        clock.logTime("Vacuuming tables");
+
+        vacuumTables(tables);
+        notifier.notify(jobId,"Vacuumed tables");
+
         notifier.notify( jobId, "Creating indexes" );
         
         createIndexes( tables );
