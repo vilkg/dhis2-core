@@ -350,11 +350,8 @@ public class InitTableAlteror
         executeSql( "update datavalueaudit set created=now() where created is null" );
         executeSql( "alter table datavalueaudit drop column timestamp" );
 
-        executeSql( "update trackedentitydatavalue set created=timestamp where created is null" );
-        executeSql( "update trackedentitydatavalue set lastupdated=timestamp where lastupdated is null" );
         executeSql( "update trackedentityattributevalue set created=now() where created is null" );
         executeSql( "update trackedentityattributevalue set lastupdated=now() where lastupdated is null" );
-        executeSql( "alter table trackedentitydatavalue drop column timestamp" );
     }
 
     private void updateProgramStatus()

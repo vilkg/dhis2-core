@@ -45,12 +45,7 @@ public class EventDataValue implements Serializable
      */
     private static final long serialVersionUID = 2738519623273453182L;
 
-//    private DataElement dataElement;
     private String dataElement;
-
-    //TODO: Maybe I need to keep at least an UID of programStageInstance so I can use it in equals and
-    //TODO: hashCode (for uses in collections / hibernate cache)?
-//    private ProgramStageInstance programStageInstance;
 
     private Date created = new Date();
 
@@ -84,7 +79,6 @@ public class EventDataValue implements Serializable
     public EventDataValue( String dataElement, String value )
     {
         this.dataElement = dataElement;
-//        this.programStageInstance = programStageInstance;
         setValue( value );
     }
 
@@ -124,26 +118,12 @@ public class EventDataValue implements Serializable
             return false;
         }
 
-        //TODO: Maybe I need to keep at least an UID of programStageInstance so I can use it in equals and
-        //TODO: hashCode (for uses in collections / hibernate cache)?
-
         return dataElement.equals( ( (EventDataValue) object ).dataElement );
     }
 
     // -------------------------------------------------------------------------
     // Getters and setters
     // -------------------------------------------------------------------------
-
-//    public void setProgramStageInstance( ProgramStageInstance programStageInstance )
-//    {
-//        this.programStageInstance = programStageInstance;
-//    }
-//
-//    public ProgramStageInstance getProgramStageInstance()
-//    {
-//        return programStageInstance;
-//    }
-
     public Boolean getProvidedElsewhere()
     {
         return providedElsewhere;
@@ -221,7 +201,6 @@ public class EventDataValue implements Serializable
     {
         return "EventDataValue{" +
             "dataElement=" + dataElement +
-//            ", programStageInstance=" + programStageInstance.getUid() +
             ", created=" + created +
             ", lastUpdated=" + lastUpdated +
             ", value='" + value + '\'' +

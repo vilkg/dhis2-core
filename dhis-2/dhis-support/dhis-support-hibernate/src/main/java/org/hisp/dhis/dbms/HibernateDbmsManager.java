@@ -245,7 +245,6 @@ public class HibernateDbmsManager
         emptyTable( "programruleaction" );
         emptyTable( "programrule" );
 
-        emptyTable( "trackedentitydatavalue" );
         emptyTable( "trackedentitydatavalueaudit" );
         emptyTable( "programstageinstance" );
         emptyTable( "programinstance" );
