@@ -62,24 +62,6 @@ public class DefaultTrackedEntityDataValueAuditService
     }
 
     @Override
-    public List<TrackedEntityDataValueAudit> getTrackedEntityDataValueAudits( TrackedEntityDataValue trackedEntityDataValue )
-    {
-        return getTrackedEntityDataValueAudits( trackedEntityDataValue.getDataElement(), trackedEntityDataValue.getProgramStageInstance() );
-    }
-
-    @Override
-    public List<TrackedEntityDataValueAudit> getTrackedEntityDataValueAudits( DataElement dataElement, ProgramStageInstance programStageInstance )
-    {
-        return getTrackedEntityDataValueAudits( Lists.newArrayList( dataElement ), Lists.newArrayList( programStageInstance ) );
-    }
-
-    @Override
-    public List<TrackedEntityDataValueAudit> getTrackedEntityDataValueAudits( List<DataElement> dataElements, List<ProgramStageInstance> programStageInstances )
-    {
-        return trackedEntityDataValueAuditStore.getTrackedEntityDataValueAudits( dataElements, programStageInstances, null );
-    }
-
-    @Override
     public List<TrackedEntityDataValueAudit> getTrackedEntityDataValueAudits( List<DataElement> dataElements,
         List<ProgramStageInstance> programStageInstances, AuditType auditType )
     {

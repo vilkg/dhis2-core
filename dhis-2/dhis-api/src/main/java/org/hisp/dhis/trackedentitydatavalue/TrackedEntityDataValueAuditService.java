@@ -41,12 +41,6 @@ public interface TrackedEntityDataValueAuditService
 {
     void addTrackedEntityDataValueAudit( TrackedEntityDataValueAudit trackedEntityDataValueAudit );
 
-    List<TrackedEntityDataValueAudit> getTrackedEntityDataValueAudits( TrackedEntityDataValue trackedEntityDataValue );
-
-    List<TrackedEntityDataValueAudit> getTrackedEntityDataValueAudits( DataElement dataElement, ProgramStageInstance programStageInstance );
-
-    List<TrackedEntityDataValueAudit> getTrackedEntityDataValueAudits( List<DataElement> dataElements, List<ProgramStageInstance> programStageInstances );
-
     List<TrackedEntityDataValueAudit> getTrackedEntityDataValueAudits( List<DataElement> dataElements, List<ProgramStageInstance> programStageInstances,
         AuditType auditType );
 
