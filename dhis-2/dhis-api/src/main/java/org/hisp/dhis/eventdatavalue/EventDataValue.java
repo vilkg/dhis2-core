@@ -27,6 +27,7 @@ package org.hisp.dhis.eventdatavalue;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
 import org.springframework.util.StringUtils;
@@ -139,6 +140,7 @@ public class EventDataValue implements Serializable
         this.dataElement = dataElement;
     }
 
+    @JsonIgnore
     public String getDataElement()
     {
         return dataElement;
@@ -192,6 +194,7 @@ public class EventDataValue implements Serializable
         this.storedBy = storedBy;
     }
 
+    @JsonIgnore
     public String getAuditValue()
     {
         return auditValue;

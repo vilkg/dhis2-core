@@ -46,7 +46,7 @@
     <param name="clazz">org.hisp.dhis.interpretation.Mention</param>
   </typedef>
 
-  <typedef class="org.hisp.dhis.hibernate.jsonb.type.JsonSetBinaryType" name="jsbEventDataValues">
+  <typedef class="org.hisp.dhis.hibernate.jsonb.type.JsonEventDataValueSetBinaryType" name="jsbEventDataValues">
     <param name="clazz">org.hisp.dhis.eventdatavalue.EventDataValue</param>
   </typedef>
 

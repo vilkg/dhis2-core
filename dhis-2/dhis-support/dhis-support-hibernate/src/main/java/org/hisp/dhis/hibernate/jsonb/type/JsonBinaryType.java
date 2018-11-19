@@ -51,121 +51,8 @@ import java.util.Properties;
  * @author Stian Sandvold <stian@dhis2.org>
  */
 @SuppressWarnings("rawtypes")
-public class JsonBinaryType implements UserType, ParameterizedType
+public class JsonBinaryType extends AbstractJsonBinaryType implements ParameterizedType
 {
-    static final ObjectMapper MAPPER = new ObjectMapper();
-
-    static
-    {
-        MAPPER.setSerializationInclusion( JsonInclude.Include.NON_NULL );
-    }
-
-    private ObjectWriter writer;
-
-    private ObjectReader reader;
-
-    private Class returnedClass;
-
-    @Override
-    public int[] sqlTypes()
-    {
-        return new int[]{ Types.JAVA_OBJECT };
-    }
-
-    @Override
-    public Class returnedClass()
-    {
-        return returnedClass;
-    }
-
-    @Override
-    public boolean equals( Object x, Object y ) throws HibernateException
-    {
-        return x == y || !(x == null || y == null) && x.equals( y );
-    }
-
-    @Override
-    public int hashCode( Object x ) throws HibernateException
-    {
-        return null == x ? 0 : x.hashCode();
-    }
-
-    @Override
-    public Object nullSafeGet( ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner ) throws HibernateException, SQLException
-    {
-        final Object result = rs.getObject( names[0] );
-
-        if ( !rs.wasNull() )
-        {
-            String content = null;
-
-            if ( result instanceof String )
-            {
-                content = (String) result;
-            }
-            else if ( result instanceof PGobject )
-            {
-                content = ((PGobject) result).getValue();
-            }
-            
-            // Other types currently ignored
-            
-            if ( content != null )
-            {
-                return convertJsonToObject( content );
-            }
-        }
-
-        return null;
-    }
-    
-    @Override
-    public void nullSafeSet( PreparedStatement ps, Object value, int idx, SharedSessionContractImplementor session ) throws HibernateException, SQLException
-    {
-        if ( value == null )
-        {
-            ps.setObject( idx, null );
-            return;
-        }
-
-        PGobject pg = new PGobject();
-        pg.setType( "jsonb" );
-        pg.setValue( convertObjectToJson( value ) );
-
-        ps.setObject( idx, pg );
-    }
-
-    @Override
-    public Object deepCopy( Object value ) throws HibernateException
-    {
-        String json = convertObjectToJson( value );
-        return convertJsonToObject( json );
-    }
-
-    @Override
-    public boolean isMutable()
-    {
-        return true;
-    }
-
-    @Override
-    public Serializable disassemble( Object value ) throws HibernateException
-    {
-        return (Serializable) this.deepCopy( value );
-    }
-
-    @Override
-    public Object assemble( Serializable cached, Object owner ) throws HibernateException
-    {
-        return this.deepCopy( cached );
-    }
-
-    @Override
-    public Object replace( Object original, Object target, Object owner ) throws HibernateException
-    {
-        return this.deepCopy( original );
-    }
-
     @Override
     public void setParameterValues( Properties parameters )
     {
@@ -218,6 +105,7 @@ public class JsonBinaryType implements UserType, ParameterizedType
      * @param object the object to convert.
      * @return JSON content.
      */
+    @Override
     protected String convertObjectToJson( Object object )
     {
         try
@@ -236,6 +124,7 @@ public class JsonBinaryType implements UserType, ParameterizedType
      * @param content the JSON content.
      * @return an object.
      */
+    @Override
     protected Object convertJsonToObject( String content )
     {
         try

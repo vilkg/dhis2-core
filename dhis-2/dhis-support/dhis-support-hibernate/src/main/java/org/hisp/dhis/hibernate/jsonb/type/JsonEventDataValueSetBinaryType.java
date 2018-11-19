@@ -26,22 +26,53 @@ package org.hisp.dhis.hibernate.jsonb.type;/*
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.hisp.dhis.eventdatavalue.EventDataValue;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 /**
  * @author David Katuscak
  */
-public class JsonSetBinaryType extends JsonBinaryType
+public class JsonEventDataValueSetBinaryType extends AbstractJsonBinaryType
 {
+
+    public JsonEventDataValueSetBinaryType() {
+        super();
+        writer = MAPPER.writerFor( new TypeReference<Map<String, EventDataValue>>() {} );
+        reader = MAPPER.readerFor( new TypeReference<Map<String, EventDataValue>>() {} );
+        returnedClass = EventDataValue.class;
+    }
+
     @Override
-    protected String convertObjectToJson( Object value )
+    public Class<EventDataValue> returnedClass()
+    {
+        return EventDataValue.class;
+    }
+
+    /**
+     * Serializes an object to JSON.
+     *
+     * @param object the object to convert.
+     * @return JSON content.
+     */
+    protected String convertObjectToJson( Object object )
     {
         try
         {
-            return MAPPER.writeValueAsString( value );
+            Set<EventDataValue> eventDataValues = (Set<EventDataValue>) object;
+
+            Map<String, EventDataValue> tempMap = new HashMap<>();
+
+            for( EventDataValue eventDataValue : eventDataValues ) {
+                tempMap.put( eventDataValue.getDataElement(), eventDataValue );
+            }
+
+            return writer.writeValueAsString( object );
         }
         catch ( IOException e )
         {
@@ -49,14 +80,28 @@ public class JsonSetBinaryType extends JsonBinaryType
         }
     }
 
-    @Override
+    /**
+     * Deserializes JSON content to an object.
+     *
+     * @param content the JSON content.
+     * @return an object.
+     */
     protected Object convertJsonToObject( String content )
     {
         try
         {
-            JavaType type = MAPPER.getTypeFactory().constructCollectionType( Set.class, returnedClass() );
+            Map<String, EventDataValue> data = reader.readValue(content);
 
-            return MAPPER.readValue( content, type );
+            Set<EventDataValue> eventDataValues = new HashSet<>();
+
+            for ( Map.Entry<String, EventDataValue> entry : data.entrySet() ) {
+
+                EventDataValue eventDataValue = entry.getValue();
+                eventDataValue.setDataElement( entry.getKey() );
+                eventDataValues.add( eventDataValue );
+            }
+
+            return eventDataValues;
         }
         catch ( IOException e )
         {
