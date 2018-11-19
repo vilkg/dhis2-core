@@ -32,7 +32,7 @@ import org.hisp.quick.JdbcConfiguration;
 import org.hisp.quick.batchhandler.AbstractBatchHandler;
 import org.hisp.dhis.dataset.CompleteDataSetRegistration;
 
-import static org.hisp.dhis.system.util.DateUtils.getLongDateString;
+import static org.hisp.dhis.hibernate.util.DateUtils.getLongDateString;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

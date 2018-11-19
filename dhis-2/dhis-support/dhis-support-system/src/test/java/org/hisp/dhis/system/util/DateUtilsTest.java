@@ -30,6 +30,7 @@ package org.hisp.dhis.system.util;
 
 import com.google.common.collect.Sets;
 import org.hisp.dhis.calendar.impl.NepaliCalendar;
+import org.hisp.dhis.hibernate.util.DateUtils;
 import org.joda.time.DateTime;
 import org.junit.Test;
 
@@ -38,8 +39,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Date;
 
-import static org.hisp.dhis.system.util.DateUtils.dateIsValid;
-import static org.hisp.dhis.system.util.DateUtils.dateTimeIsValid;
+import static org.hisp.dhis.hibernate.util.DateUtils.dateIsValid;
+import static org.hisp.dhis.hibernate.util.DateUtils.dateTimeIsValid;
 import static org.junit.Assert.*;
 
 /**

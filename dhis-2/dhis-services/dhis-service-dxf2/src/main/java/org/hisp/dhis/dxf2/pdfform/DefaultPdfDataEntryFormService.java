@@ -47,7 +47,7 @@ import org.hisp.dhis.period.*;
 import org.hisp.dhis.program.ProgramStage;
 import org.hisp.dhis.program.ProgramStageSection;
 import org.hisp.dhis.program.ProgramStageService;
-import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.hibernate.util.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.awt.*;

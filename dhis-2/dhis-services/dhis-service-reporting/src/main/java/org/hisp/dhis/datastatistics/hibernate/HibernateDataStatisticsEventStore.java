@@ -47,7 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hisp.dhis.system.util.DateUtils.asSqlDate;
+import static org.hisp.dhis.hibernate.util.DateUtils.asSqlDate;
 
 /**
  * @author Yrjan A. F. Fraschetti

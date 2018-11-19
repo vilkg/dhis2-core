@@ -69,7 +69,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.hisp.dhis.system.util.DateUtils.getMediumDate;
+import static org.hisp.dhis.hibernate.util.DateUtils.getMediumDate;
 
 /**
  * TODO Unit testing

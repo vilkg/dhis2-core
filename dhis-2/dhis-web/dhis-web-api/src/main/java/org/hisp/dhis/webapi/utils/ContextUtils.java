@@ -52,7 +52,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 import static org.apache.commons.lang3.StringUtils.trimToNull;
-import static org.hisp.dhis.system.util.DateUtils.getSecondsUntilTomorrow;
+import static org.hisp.dhis.hibernate.util.DateUtils.getSecondsUntilTomorrow;
 
 /**
  * @author Lars Helge Overland

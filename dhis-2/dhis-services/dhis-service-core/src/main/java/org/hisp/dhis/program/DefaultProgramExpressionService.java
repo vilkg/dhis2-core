@@ -31,7 +31,7 @@ package org.hisp.dhis.program;
 import org.hisp.dhis.common.GenericStore;
 import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.dataelement.DataElementService;
-import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.hibernate.util.DateUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;

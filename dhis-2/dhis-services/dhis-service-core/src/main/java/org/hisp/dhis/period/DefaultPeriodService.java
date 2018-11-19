@@ -29,7 +29,7 @@ package org.hisp.dhis.period;
  */
 
 import org.hisp.dhis.i18n.I18nFormat;
-import org.hisp.dhis.system.util.DateUtils;
+import org.hisp.dhis.hibernate.util.DateUtils;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
