@@ -64,7 +64,7 @@ public abstract class AbstractEventJdbcTableManager
      * 
      * @param valueType the value type to represent as database column type.
      */
-    protected String getColumnType( ValueType valueType )
+    String getColumnType( ValueType valueType )
     {
         if ( valueType.isDecimal() )
         {
@@ -98,31 +98,31 @@ public abstract class AbstractEventJdbcTableManager
      * 
      * @param valueType the value type to represent as database column type.
      */
-    protected String getSelectClause( ValueType valueType )
+    String getSelectClause( ValueType valueType, String columnName )
     {
         if ( valueType.isDecimal() )
         {
-            return "cast(value as " + statementBuilder.getDoubleColumnType() + ")";
+            return "cast(" + columnName + " as " + statementBuilder.getDoubleColumnType() + ")";
         }
         else if ( valueType.isInteger() )
         {
-            return "cast(value as bigint)";
+            return "cast(" + columnName + " as bigint)";
         }
         else if ( valueType.isBoolean() )
         {
-            return "case when value = 'true' then 1 when value = 'false' then 0 else null end";
+            return "case when " + columnName + " = 'true' then 1 when " + columnName + " = 'false' then 0 else null end";
         }
         else if ( valueType.isDate() )
         {
-            return "cast(value as timestamp)";
+            return "cast(" + columnName + " as timestamp)";
         }
         else if ( valueType.isGeo() && databaseInfo.isSpatialSupport() )
         {
-            return "ST_GeomFromGeoJSON('{\"type\":\"Point\", \"coordinates\":' || value || ', \"crs\":{\"type\":\"name\", \"properties\":{\"name\":\"EPSG:4326\"}}}')";
+            return "ST_GeomFromGeoJSON('{\"type\":\"Point\", \"coordinates\":' || " + columnName + " || ', \"crs\":{\"type\":\"name\", \"properties\":{\"name\":\"EPSG:4326\"}}}')";
         }
         else
         {
-            return "value";
+            return columnName;
         }
     }
     

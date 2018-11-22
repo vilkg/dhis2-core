@@ -37,21 +37,21 @@ import org.hisp.dhis.analytics.AnalyticsTableType;
 import org.hisp.dhis.common.ValueType;
 import org.hisp.dhis.commons.collection.UniqueArrayList;
 import org.hisp.dhis.commons.util.TextUtils;
-import org.hisp.dhis.dataelement.DataElement;
 import org.hisp.dhis.organisationunit.OrganisationUnitGroupSet;
 import org.hisp.dhis.organisationunit.OrganisationUnitLevel;
 import org.hisp.dhis.period.PeriodType;
 import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramStage;
-import org.hisp.dhis.program.ProgramStageDataElement;
 import org.hisp.dhis.trackedentity.TrackedEntityAttribute;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
-import static org.hisp.dhis.program.ProgramIndicator.DB_SEPARATOR_ID;
-import static org.hisp.dhis.system.util.MathUtils.NUMERIC_LENIENT_REGEXP;
 import static org.hisp.dhis.analytics.util.AnalyticsSqlUtils.quote;
+import static org.hisp.dhis.system.util.MathUtils.NUMERIC_LENIENT_REGEXP;
 
 /**
  * @author Markus Bekken
@@ -175,7 +175,7 @@ public class JdbcEnrollmentAnalyticsTableManager
         {
             String dataType = getColumnType( attribute.getValueType() );
             String dataClause = attribute.isNumericType() ? numericClause : attribute.isDateType() ? dateClause : "";
-            String select = getSelectClause( attribute.getValueType() );
+            String select = getSelectClause( attribute.getValueType(), "value" );
             boolean skipIndex = NO_INDEX_VAL_TYPES.contains( attribute.getValueType() ) && !attribute.hasOptionSet();
 
             String sql = "(select " + select + " from trackedentityattributevalue " +
