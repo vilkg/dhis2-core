@@ -912,10 +912,7 @@ public class TableAlteror
         executeSql( "alter table datavalue alter column value type varchar(50000)" );
         executeSql( "alter table datavalue alter column comment type varchar(50000)" );
         executeSql( "alter table datavalueaudit alter column value type varchar(50000)" );
-        executeSql( "alter table trackedentitydatavalue alter column value type varchar(50000)" );
         executeSql( "alter table trackedentityattributevalue alter column value type varchar(50000)" );
-
-        executeSql( "update trackedentitydatavalue set providedelsewhere=false where providedelsewhere is null" );
 
         executeSql( "update datavalueaudit set attributeoptioncomboid = " + defaultOptionComboId + " where attributeoptioncomboid is null" );
         executeSql( "alter table datavalueaudit alter column attributeoptioncomboid set not null;" );
@@ -996,7 +993,6 @@ public class TableAlteror
         executeSql( "drop table aggregatedorgunitindicatorvalue" );
         executeSql( "drop table aggregatedorgunitindicatorvalue_temp" );
 
-        executeSql( "alter table trackedentitydatavalue alter column storedby TYPE character varying(255)" );
         executeSql( "alter table datavalue alter column storedby TYPE character varying(255)" );
 
         executeSql( "alter table datastatisticsevent alter column eventtype type character varying" );

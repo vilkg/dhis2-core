@@ -31,6 +31,9 @@ package org.hisp.dhis.program;
 import org.hisp.dhis.common.IdentifiableObjectStore;
 import org.hisp.dhis.dataelement.DataElement;
 
+import java.util.Map;
+import java.util.Set;
+
 /**
  * @author Viet Nguyen
  */
@@ -48,4 +51,12 @@ public interface ProgramStageDataElementStore
      * @return ProgramStageDataElement
      */
     ProgramStageDataElement get( ProgramStage programStage, DataElement dataElement );
+
+
+    /**
+     * Returns Map of ProgramStages containing Set of DataElements (together ProgramStageDataElements) that have skipSynchronization flag set to true
+     *
+     * @return Map<String, Set<String>>
+     */
+    Map<String, Set<String>> getProgramStageDataElementsWithSkipSynchronizationSetToTrue();
 }

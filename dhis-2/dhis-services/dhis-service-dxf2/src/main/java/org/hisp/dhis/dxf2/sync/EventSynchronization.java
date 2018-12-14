@@ -34,6 +34,7 @@ import org.hisp.dhis.dxf2.events.event.Event;
 import org.hisp.dhis.dxf2.events.event.EventService;
 import org.hisp.dhis.dxf2.events.event.Events;
 import org.hisp.dhis.dxf2.synch.SystemInstance;
+import org.hisp.dhis.program.ProgramStageDataElementService;
 import org.hisp.dhis.render.RenderService;
 import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
@@ -46,6 +47,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -63,13 +66,17 @@ public class EventSynchronization
 
     private final RenderService renderService;
 
+    private final ProgramStageDataElementService programStageDataElementService;
+
     @Autowired
-    public EventSynchronization( EventService eventService, SystemSettingManager systemSettingManager, RestTemplate restTemplate, RenderService renderService )
+    public EventSynchronization( EventService eventService, SystemSettingManager systemSettingManager, RestTemplate restTemplate, RenderService renderService,
+        ProgramStageDataElementService programStageDataElementService )
     {
         this.eventService = eventService;
         this.systemSettingManager = systemSettingManager;
         this.restTemplate = restTemplate;
         this.renderService = renderService;
+        this.programStageDataElementService = programStageDataElementService;
     }
 
     public SynchronizationResult syncEventProgramData()
@@ -105,11 +112,13 @@ public class EventSynchronization
         log.info( "Remote server URL for Events POST synchronization: " + syncUrl );
         log.info( "Events synchronization job has " + pages + " pages to synchronize. With page size: " + pageSize );
 
+        final Map<String, Set<String>> psdesWithSkipSyncTrue = programStageDataElementService.getProgramStageDataElementsWithSkipSynchronizationSetToTrue();
+
         boolean syncResult = true;
 
         for ( int i = 1; i <= pages; i++ )
         {
-            Events events = eventService.getAnonymousEventsForSync( pageSize );
+            Events events = eventService.getAnonymousEventsForSync( pageSize, psdesWithSkipSyncTrue );
             filterOutDataValuesMarkedWithSkipSynchronizationFlag( events );
             log.info( String.format( "Synchronizing page %d with page size %d", i, pageSize ) );
 

@@ -46,6 +46,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -92,9 +93,10 @@ public interface EventService
      * Returns the anonymous events that are supposed to be synchronized (lastUpdated > lastSynchronized)
      *
      * @param pageSize Specifies the max number for the events returned.
+     * @param psdesWithSkipSyncTrue Holds information about PSDEs for which the data should not be synchronized
      * @return the anonymous events that are supposed to be synchronized (lastUpdated > lastSynchronized)
      */
-    Events getAnonymousEventsForSync( int pageSize );
+    Events getAnonymousEventsForSync( int pageSize, Map<String, Set<String>> psdesWithSkipSyncTrue );
 
     // -------------------------------------------------------------------------
     // CREATE

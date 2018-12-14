@@ -578,7 +578,7 @@ public abstract class AbstractEventService
             events.setPager( pager );
         }
 
-        List<Event> eventList = eventStore.getEvents( params, organisationUnits );
+        List<Event> eventList = eventStore.getEvents( params, organisationUnits, Collections.emptyMap() );
 
         User user = currentUserService.getCurrentUser();
 
@@ -739,13 +739,13 @@ public abstract class AbstractEventService
     {
         EventSearchParams params = buildAnonymousEventsSearchParams( lastSuccessTime );
         Events anonymousEvents = new Events();
-        List<Event> events = eventStore.getEvents( params, null );
+        List<Event> events = eventStore.getEvents( params, null, Collections.emptyMap() );
         anonymousEvents.setEvents( events );
         return anonymousEvents;
     }
 
     @Override
-    public Events getAnonymousEventsForSync( int pageSize )
+    public Events getAnonymousEventsForSync( int pageSize, Map<String, Set<String>> psdesWithSkipSyncTrue )
     {
         //A page is not specified here. The reason is, that after a page is synchronized, the items that were in that page
         // get lastSynchronized column updated. Therefore, they are not present in the results in the next query anymore.
@@ -759,7 +759,7 @@ public abstract class AbstractEventService
         params.setPageSize( pageSize );
 
         Events anonymousEvents = new Events();
-        List<Event> events = eventStore.getEvents( params, null );
+        List<Event> events = eventStore.getEvents( params, null, psdesWithSkipSyncTrue );
         anonymousEvents.setEvents( events );
         return anonymousEvents;
     }

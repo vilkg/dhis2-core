@@ -34,6 +34,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * @author David Katuscak
@@ -102,20 +103,18 @@ public class EventDataValue implements Serializable
     @Override
     public int hashCode()
     {
-        return 31 + (StringUtils.isEmpty(dataElement ) ? 0 : dataElement.hashCode());
+        return Objects.hash( dataElement );
     }
 
     @Override
     public boolean equals( Object object )
     {
-        if ( object == null ) {
-            return false;
-        }
-        else if ( this == object ) {
+        if ( this == object )
+        {
             return true;
         }
-
-        if ( !( object instanceof EventDataValue ) ) {
+        if ( object == null || getClass() != object.getClass() )
+        {
             return false;
         }
 

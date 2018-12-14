@@ -86,7 +86,7 @@ public class JsonEventDataValueSetBinaryType extends AbstractJsonBinaryType
      * @param content the JSON content.
      * @return an object.
      */
-    protected Object convertJsonToObject( String content )
+    public Object convertJsonToObject( String content )
     {
         try
         {
