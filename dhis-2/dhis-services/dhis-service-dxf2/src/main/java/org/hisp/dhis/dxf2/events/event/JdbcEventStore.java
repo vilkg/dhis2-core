@@ -139,6 +139,7 @@ public class JdbcEventStore
     // EventStore implementation
     // -------------------------------------------------------------------------
 
+    //TODO: Can I go without using SupressWarning?
     @SuppressWarnings( "unchecked" )
     @Override
     public List<Event> getEvents( EventSearchParams params, List<OrganisationUnit> organisationUnits, Map<String, Set<String>> psdesWithSkipSyncTrue )
@@ -162,6 +163,7 @@ public class JdbcEventStore
 
         SqlRowSet rowSet = jdbcTemplate.queryForRowSet( sql );
 
+        //TODO: Remove info logging before merging
         log.info( "Event query SQL: " + sql );
 
         log.debug( "Event query SQL: " + sql );
@@ -258,7 +260,7 @@ public class JdbcEventStore
                 }
             }
 
-            if ( org.springframework.util.StringUtils.isEmpty( rowSet.getString( "psi_eventdatavalues" ) ) )
+            if ( !org.springframework.util.StringUtils.isEmpty( rowSet.getString( "psi_eventdatavalues" ) ) )
             {
                 JsonEventDataValueSetBinaryType eventDataValueJsonbType = new JsonEventDataValueSetBinaryType();
                 Set<EventDataValue> eventDataValues = (Set<EventDataValue>) eventDataValueJsonbType.convertJsonToObject( rowSet.getString( "psi_eventdatavalues" ) );
@@ -336,6 +338,7 @@ public class JdbcEventStore
         return list;
     }
 
+    //TODO: Can I go without using SupressWarnings?
     @SuppressWarnings( "unchecked" )
     @Override
     public List<EventRow> getEventRows( EventSearchParams params, List<OrganisationUnit> organisationUnits )
@@ -417,7 +420,7 @@ public class JdbcEventStore
                 eventRow.getAttributes().add( attribute );
             }
 
-            if ( org.springframework.util.StringUtils.isEmpty( rowSet.getString( "psi_eventdatavalues" ) ) )
+            if ( !org.springframework.util.StringUtils.isEmpty( rowSet.getString( "psi_eventdatavalues" ) ) )
             {
                 JsonEventDataValueSetBinaryType eventDataValueJsonbType = new JsonEventDataValueSetBinaryType();
                 Set<EventDataValue> eventDataValues = (Set<EventDataValue>) eventDataValueJsonbType.convertJsonToObject( rowSet.getString( "psi_eventdatavalues" ) );
@@ -516,15 +519,16 @@ public class JdbcEventStore
 
         for ( QueryItem item : params.getDataElementsAndFilters() )
         {
-            String col = statementBuilder.columnQuote( item.getItemId() );
+            final String col = statementBuilder.columnQuote( item.getItemId() );
+            final String dataValueValueSql = "psi.eventdatavalues #>> '{" + col + ", value}'";
 
-            String temp = "";
+            String queryCol = item.isNumeric() ? "CAST( " + dataValueValueSql + " AS NUMERIC ) as " : dataValueValueSql + " as ";
+            queryCol += col + ", ";
 
-            sql += temp = item.isNumeric() ? "CAST( psi.eventdatavalues #>> '{" + col + ", value}' AS NUMERIC ) as " : "psi.eventdatavalues #>> '{" + col + ", value}' as ";
+            //TODO: Remove logging before merging
+            log.info("Details 1: queryCol: " + queryCol + ", item.getItemId: " + item.getItemId() + ", item: " + item );
 
-            log.info("Details 1: temp: " + temp + ", item.getItemId: " + item.getItemId() + ", item: " + item );
-
-            sql += col + ", ";
+            sql += queryCol;
         }
 
         sql = removeLastComma( sql ) + " ";
@@ -603,10 +607,14 @@ public class JdbcEventStore
         for ( QueryItem item : params.getDataElementsAndFilters() )
         {
             final String col = item.getItemId();
-            final String queryCol = item.isNumeric() ? " CAST( psi.eventdatavalues #>> '{" + col + ", value}' AS NUMERIC)"
-                : "lower(psi.eventdatavalues #>> '{" + col + ", value}')";
-            sql += queryCol + " as " + col + ", ";
+            final String dataValueValueSql = "psi.eventdatavalues #>> '{" + col + ", value}'";
 
+            String queryCol = item.isNumeric() ? " CAST( " + dataValueValueSql + " AS NUMERIC)" : "lower(" + dataValueValueSql + ")";
+            queryCol += " as " + col + ", ";
+
+            sql += queryCol;
+
+            //TODO: Remove logging before merging
             log.info("Details 2: " + queryCol + " as " + col + ", " );
         }
 
@@ -632,32 +640,7 @@ public class JdbcEventStore
 
         String eventDataValuesWhereSql = "";
 
-//        for ( QueryItem item : params.getDataElementsAndFilters() )
-//        {
-//            final String col = statementBuilder.columnQuote( item.getItemId() );
-//
-//            if ( !joinedColumns.contains( col ) )
-//            {
-//                sql += (item.hasFilter() ? "inner" : "left") + " join trackedentitydatavalue as " + col + " " + "on " + col
-//                    + ".programstageinstanceid = psi.programstageinstanceid " + "and " + col + ".dataelementid = "
-//                    + item.getItem().getId() + " ";
-//
-//                joinedColumns.add( col );
-//            }
-//
-//            for ( QueryFilter filter : item.getFilters() )
-//            {
-//                final String encodedFilter = statementBuilder.encode( filter.getFilter(), false );
-//
-//                final String queryCol = item.isNumeric() ? " CAST( " + (col + ".value AS NUMERIC)")
-//                    : "lower(" + col + ".value)";
-//
-//                sql += "and " + queryCol + " " + filter.getSqlOperator() + " "
-//                    + StringUtils.lowerCase( StringUtils.isNumeric( encodedFilter ) ? encodedFilter :
-//                    filter.getSqlFilter( encodedFilter ) ) + " ";
-//            }
-//        }
-
+        //TODO: The logic is taken from the master. So it takes care of optionSets already
         for ( QueryItem item : params.getDataElementsAndFilters() )
         {
             final String col = statementBuilder.columnQuote( item.getItemId() );
@@ -669,15 +652,13 @@ public class JdbcEventStore
 
                 if ( item.hasOptionSet() && item.hasFilter() )
                 {
-                    final String joinClause = item.hasFilter() ? "inner join" : "left join";
-
+                    //TODO: Remove temp variable and logging before merging
                     String temp = "";
 
-                    sql += temp = joinClause + " " + "optionvalue as " + optCol + " on lower(" + optCol + ".code) = " +
+                    sql += temp = "inner join optionvalue as " + optCol + " on lower(" + optCol + ".code) = " +
                         "lower(psi.eventdatavalues #>> '{" + col + ", value}') and " + optCol + ".optionsetid = " + item.getOptionSet().getId() + " ";
 
                     log.info( "Details 3: " );
-                    log.info( "joinClause: " + joinClause );
                     log.info( "temp: " + temp );
                 }
             }
@@ -687,14 +668,17 @@ public class JdbcEventStore
                 for ( QueryFilter filter : item.getFilters() )
                 {
                     final String encodedFilter = statementBuilder.encode( filter.getFilter(), false );
+                    final String dataValueValueSql = "psi.eventdatavalues #>> '{" + col + ", value}'";
 
-                    final String queryCol = item.isNumeric() ? " CAST( psi.eventdatavalues #>> '{" + col + ", value}' AS NUMERIC)"
-                        : "lower(psi.eventdatavalues #>> '{" + col + ", value}')";
+                    final String queryCol = item.isNumeric() ? " CAST( " + dataValueValueSql + " AS NUMERIC)" : "lower( " + dataValueValueSql + " )";
 
+                    //TODO: Remove temp variable and logging before merging
                     String temp = "";
 
                     if ( !item.hasOptionSet() )
                     {
+                        //Previously, the filters where used on JOIN to trackedentitydatavalue table. Now, the table was removed and I am moving
+                        // filters into WHERE part of the query. But assembling it here
                         if ( !eventDataValuesWhereSql.isEmpty() ) {
                             eventDataValuesWhereSql += " and ";
                         }
@@ -702,21 +686,25 @@ public class JdbcEventStore
                         eventDataValuesWhereSql += temp = " " + queryCol + " " + filter.getSqlOperator() + " "
                             + StringUtils.lowerCase( StringUtils.isNumeric( encodedFilter ) ? encodedFilter :
                             filter.getSqlFilter( encodedFilter ) ) + " ";
+
+                        log.info( "Further details (moved into WHERE part): " + temp );
                     }
                     else if ( QueryOperator.IN.getValue().equalsIgnoreCase( filter.getSqlOperator() ) )
                     {
                         sql += temp = "and " + queryCol + " " + filter.getSqlOperator() + " "
                             + StringUtils.lowerCase( StringUtils.isNumeric( encodedFilter ) ? encodedFilter :
                             filter.getSqlFilter( encodedFilter ) ) + " ";
+
+                        log.info( "Further details: " + temp );
                     }
                     else
                     {
                         sql += temp = "and lower(" + optCol + ".name)" + " " + filter.getSqlOperator() + " "
                             + StringUtils.lowerCase( StringUtils.isNumeric( encodedFilter ) ? encodedFilter :
                             filter.getSqlFilter( encodedFilter ) ) + " ";
-                    }
 
-                    log.info( "Furter details: " + temp );
+                        log.info( "Further details: " + temp );
+                    }
                 }
             }
         }
@@ -859,6 +847,7 @@ public class JdbcEventStore
 
         String eventDataValuesWhereSql = "";
 
+        //TODO: The logic is taken from the master. So it takes care of optionSets already
         for ( QueryItem item : params.getDataElementsAndFilters() )
         {
             final String col = statementBuilder.columnQuote( item.getItemId() );
@@ -867,17 +856,16 @@ public class JdbcEventStore
             if ( !joinedColumns.contains( col ) )
             {
                 joinedColumns.add( col );
+
+                //TODO: Remove temp variable and logging before merging
                 String temp = "";
 
                 if ( item.hasOptionSet() && item.hasFilter() )
                 {
-                    final String joinClause = item.hasFilter() ? "inner join" : "left join";
-
-                    sql += temp = joinClause + " " + "optionvalue as " + optCol + " on lower(" + optCol + ".code) = " +
+                    sql += temp = "inner join optionvalue as " + optCol + " on lower(" + optCol + ".code) = " +
                         "lower(psi.eventdatavalues #>> '{" + col + ", value}') and " + optCol + ".optionsetid = " + item.getOptionSet().getId() + " ";
 
                     log.info("Details 4: ");
-                    log.info( "joinClause: " + joinClause );
                     log.info( "temp: " + temp );
                 }
             }
@@ -887,33 +875,39 @@ public class JdbcEventStore
                 for ( QueryFilter filter : item.getFilters() )
                 {
                     final String encodedFilter = statementBuilder.encode( filter.getFilter(), false );
+                    final String dataValueValueSql = "psi.eventdatavalues #>> '{" + col + ", value}'";
 
-                    final String queryCol = item.isNumeric() ? " CAST( psi.eventdatavalues #>> '{" + col + ", value}' AS NUMERIC)"
-                        : "lower(psi.eventdatavalues #>> '{" + col + ", value}')";
+                    final String queryCol = item.isNumeric() ? " CAST( " + dataValueValueSql + " AS NUMERIC)" : "lower(" + dataValueValueSql + ")";
 
                     String temp = "";
 
                     if ( !item.hasOptionSet() )
                     {
+                        //Previously, the filters where used on JOIN to trackedentitydatavalue table. Now, the table was removed and I am moving
+                        // filters into WHERE part of the query. But assembling it here
                         if ( !eventDataValuesWhereSql.isEmpty() ) {
                             eventDataValuesWhereSql += " and ";
                         }
 
                         eventDataValuesWhereSql += temp = " " + queryCol + " " + filter.getSqlOperator() + " "
                             + StringUtils.lowerCase( filter.getSqlFilter( encodedFilter ) ) + " ";
+
+                        log.info( "Even more details (moved into WHERE part): " + temp );
                     }
                     else if ( QueryOperator.IN.getValue().equalsIgnoreCase( filter.getSqlOperator() ) )
                     {
                         sql += temp = "and " + queryCol + " " + filter.getSqlOperator() + " "
                             + StringUtils.lowerCase( filter.getSqlFilter( encodedFilter ) ) + " ";
+
+                        log.info( "Even more details: " + temp );
                     }
                     else
                     {
                         sql += temp = "and lower( " + optCol + ".name)" + " " + filter.getSqlOperator() + " "
                             + StringUtils.lowerCase( filter.getSqlFilter( encodedFilter ) ) + " ";
-                    }
 
-                    log.info( "Even more details: " + temp );
+                        log.info( "Even more details: " + temp );
+                    }
                 }
             }
         }
