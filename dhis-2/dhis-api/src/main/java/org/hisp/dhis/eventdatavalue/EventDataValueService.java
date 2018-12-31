@@ -74,13 +74,13 @@ public interface EventDataValueService
      */
     void updateEventDataValue( ProgramStageInstance programStageInstance, EventDataValue eventDataValue );
 
-    /**
-     * Updates an {@link EventDataValue}s
-     *
-     * @param programStageInstance the ProgramStageInstance that EventDataValues belongs to
-     * @param eventDataValues the Collection of EventDataValues to update
-     */
-    void updateEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues );
+//    /**
+//     * Updates an {@link EventDataValue}s
+//     *
+//     * @param programStageInstance the ProgramStageInstance that EventDataValues belongs to
+//     * @param eventDataValues the Collection of EventDataValues to update
+//     */
+//    void updateEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues );
 
     /**
      * Deletes a {@link EventDataValue} from {@link ProgramStageInstance}

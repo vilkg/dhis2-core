@@ -76,10 +76,15 @@ public class DefaultEventDataValueService implements EventDataValueService
     // Implementation methods
     // -------------------------------------------------------------------------
 
+    //TODO: All (or almost all) the logic can be simplified to directly call the SQL queries. This could/should increase performance but
+    // can make a mess with Hibernate cache. Therefore, should be discussed first.
+
     @Override
     public void persistDataValues( Set<EventDataValue> newDataValues, Set<EventDataValue> updatedDataValues,
         Set<EventDataValue> removedDataValues, Map<String, DataElement> dataElementsCache, ProgramStageInstance programStageInstance,
         boolean singleValue ) {
+
+        //TODO: See the Todo on the top of the class (Can be done with use of concatenate (||) parameter)
 
         Set<EventDataValue> updatedOrNewDataValues = Sets.union( newDataValues, updatedDataValues );
 
@@ -102,6 +107,8 @@ public class DefaultEventDataValueService implements EventDataValueService
     @Override
     public void saveEventDataValue( ProgramStageInstance programStageInstance, EventDataValue eventDataValue )
     {
+        //TODO: See the Todo on the top of the class (Can be done with use of concatenate (||) parameter)
+
         if ( !StringUtils.isEmpty( eventDataValue.getValue() ) )
         {
             eventDataValue.setAutoFields();
@@ -125,6 +132,8 @@ public class DefaultEventDataValueService implements EventDataValueService
     @Override
     public void saveEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues )
     {
+        //TODO: See the Todo on the top of the class (Can be done with use of concatenate (||) parameter)
+
         Set<EventDataValue> filteredEventDataValues = filterOutEmptyDataValues( eventDataValues );
 
         if( !filteredEventDataValues.isEmpty() )
@@ -146,7 +155,7 @@ public class DefaultEventDataValueService implements EventDataValueService
     @Override
     public void updateEventDataValue( ProgramStageInstance programStageInstance, EventDataValue eventDataValue )
     {
-        //TODO: If we will go for json string format no. 1, then this can be simplified even more and done directly by calling DB query
+        //TODO: See the Todo on the top of the class (Can be done with use of concatenate (||) parameter -> overrides existed value)
 
         if ( StringUtils.isEmpty( eventDataValue.getValue() ) )
         {
@@ -172,33 +181,38 @@ public class DefaultEventDataValueService implements EventDataValueService
         }
     }
 
-    @Override public void updateEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues )
-    {
-        Set<EventDataValue> eventDataValuesWithEmptyValues = eventDataValues.stream().filter( dv -> StringUtils.isEmpty( dv.getValue() ) ).collect( Collectors.toSet());
-        deleteEventDataValues( programStageInstance, eventDataValuesWithEmptyValues );
-
-        Set<EventDataValue> filteredEventDataValues = filterOutEmptyDataValues( eventDataValues );
-
-        if( !filteredEventDataValues.isEmpty() )
-        {
-            validateEventDataValues( filteredEventDataValues );
-
-            for ( EventDataValue eventDataValue : filteredEventDataValues )
-            {
-                DataElement dataElement = dataElementService.getDataElement( eventDataValue.getDataElement() );
-                createAndAddAudit( eventDataValue, dataElement, programStageInstance, AuditType.UPDATE );
-                handleFileDataValueUpdate( eventDataValue, dataElement );
-            }
-
-            //Need to do this as adding elements that are already added (so overwriting) is non-deterministic / not defined
-            programStageInstance.getEventDataValues().removeAll( filteredEventDataValues );
-            programStageInstance.getEventDataValues().addAll( filteredEventDataValues );
-            programStageInstanceService.updateProgramStageInstance( programStageInstance );
-        }
-    }
+    //Currently not needed
+//    @Override public void updateEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues )
+//    {
+//        //TODO: See the Todo on the top of the class (Can be done with use of concatenate (||) parameter -> overrides existed value)
+//
+//        Set<EventDataValue> eventDataValuesWithEmptyValues = eventDataValues.stream().filter( dv -> StringUtils.isEmpty( dv.getValue() ) ).collect( Collectors.toSet());
+//        deleteEventDataValues( programStageInstance, eventDataValuesWithEmptyValues );
+//
+//        Set<EventDataValue> filteredEventDataValues = filterOutEmptyDataValues( eventDataValues );
+//
+//        if( !filteredEventDataValues.isEmpty() )
+//        {
+//            validateEventDataValues( filteredEventDataValues );
+//
+//            for ( EventDataValue eventDataValue : filteredEventDataValues )
+//            {
+//                DataElement dataElement = dataElementService.getDataElement( eventDataValue.getDataElement() );
+//                createAndAddAudit( eventDataValue, dataElement, programStageInstance, AuditType.UPDATE );
+//                handleFileDataValueUpdate( eventDataValue, dataElement );
+//            }
+//
+//            //Need to do this as adding elements that are already added (so overwriting) is non-deterministic / not defined
+//            programStageInstance.getEventDataValues().removeAll( filteredEventDataValues );
+//            programStageInstance.getEventDataValues().addAll( filteredEventDataValues );
+//            programStageInstanceService.updateProgramStageInstance( programStageInstance );
+//        }
+//    }
 
     @Override public void deleteEventDataValue( ProgramStageInstance programStageInstance, EventDataValue eventDataValue )
     {
+        //TODO: See the Todo on the top of the class (Can be done with use of delete (-) parameter)
+
         if ( StringUtils.isEmpty( eventDataValue.getDataElement() ) )
         {
             throw new  IllegalQueryException( "Data element is null or empty" );
@@ -217,6 +231,8 @@ public class DefaultEventDataValueService implements EventDataValueService
 
     @Override public void deleteEventDataValues( ProgramStageInstance programStageInstance, Set<EventDataValue> eventDataValues )
     {
+        //TODO: See the Todo on the top of the class (Can be done with use of delete (-) parameter)
+
         for ( EventDataValue eventDataValue : eventDataValues ) {
             if ( StringUtils.isEmpty( eventDataValue.getDataElement() ) )
             {

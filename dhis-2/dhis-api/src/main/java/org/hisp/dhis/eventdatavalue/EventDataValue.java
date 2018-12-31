@@ -30,7 +30,6 @@ package org.hisp.dhis.eventdatavalue;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement;
 import org.hisp.dhis.common.DxfNamespaces;
-import org.springframework.util.StringUtils;
 
 import java.io.Serializable;
 import java.util.Date;

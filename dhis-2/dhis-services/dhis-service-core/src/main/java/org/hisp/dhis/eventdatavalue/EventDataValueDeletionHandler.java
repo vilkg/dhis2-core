@@ -55,9 +55,7 @@ public class EventDataValueDeletionHandler extends DeletionHandler
     @Override
     public String allowDeleteDataElement( DataElement dataElement )
     {
-        String containmentQuery = new JSONObject().put( "dataElement", dataElement.getUid() ).toString();
-
-        String sql = "select count(*) from programstageinstance where eventdatavalues @> '" + containmentQuery + "'::jsonb";
+        String sql = "select count(*) from programstageinstance where eventdatavalues ? '" + dataElement.getUid() + "'";
 
         return jdbcTemplate.queryForObject( sql, Integer.class ) == 0 ? null : ERROR;
     }
@@ -66,7 +64,8 @@ public class EventDataValueDeletionHandler extends DeletionHandler
     public void deleteProgramInstance( ProgramInstance programInstance )
     {
         for ( ProgramStageInstance psi : programInstance.getProgramStageInstances() ) {
-            deleteProgramStageInstance( psi );
+            //delegate to the other method
+            this.deleteProgramStageInstance( psi );
         }
     }
 

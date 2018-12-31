@@ -38,7 +38,7 @@ import java.util.Set;
 /**
  * @author David Katuscak
  */
-public class JsonEventDataValueSetBinaryType extends AbstractJsonBinaryType
+public class JsonEventDataValueSetBinaryType extends JsonBinaryType
 {
 
     public JsonEventDataValueSetBinaryType() {
@@ -48,18 +48,13 @@ public class JsonEventDataValueSetBinaryType extends AbstractJsonBinaryType
         returnedClass = EventDataValue.class;
     }
 
-    @Override
-    public Class<EventDataValue> returnedClass()
-    {
-        return EventDataValue.class;
-    }
-
     /**
      * Serializes an object to JSON.
      *
      * @param object the object to convert.
      * @return JSON content.
      */
+    @Override
     protected String convertObjectToJson( Object object )
     {
         try
@@ -86,6 +81,7 @@ public class JsonEventDataValueSetBinaryType extends AbstractJsonBinaryType
      * @param content the JSON content.
      * @return an object.
      */
+    @Override
     public Object convertJsonToObject( String content )
     {
         try
