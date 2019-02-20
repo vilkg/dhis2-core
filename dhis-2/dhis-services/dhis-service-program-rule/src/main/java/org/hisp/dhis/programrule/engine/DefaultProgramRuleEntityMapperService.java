@@ -58,11 +58,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
+import org.springframework.stereotype.Service;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Created by zubair@dhis2.org on 19.10.17.
  */
-
+@Service( "org.hisp.dhis.programrule.engine.ProgramRuleEntityMapperService" )
 public class DefaultProgramRuleEntityMapperService
     implements ProgramRuleEntityMapperService
 {
@@ -117,15 +120,16 @@ public class DefaultProgramRuleEntityMapperService
     // -------------------------------------------------------------------------
 
     private final ProgramRuleService programRuleService;
-
     private final ProgramRuleVariableService programRuleVariableService;
-
     private final DataElementService dataElementService;
 
-    @Autowired
-    public DefaultProgramRuleEntityMapperService( ProgramRuleService programRuleService, ProgramRuleVariableService programRuleVariableService,
-        DataElementService dataElementService )
+    public DefaultProgramRuleEntityMapperService( ProgramRuleService programRuleService,
+        ProgramRuleVariableService programRuleVariableService, DataElementService dataElementService )
     {
+        checkNotNull( programRuleService );
+        checkNotNull( programRuleVariableService );
+        checkNotNull( dataElementService );
+
         this.programRuleService = programRuleService;
         this.programRuleVariableService = programRuleVariableService;
         this.dataElementService = dataElementService;

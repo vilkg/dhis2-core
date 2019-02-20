@@ -32,6 +32,7 @@ import org.hisp.dhis.commons.filter.Filter;
 import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -40,9 +41,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author Torgeir Lorange Ostby
  */
+@Service( "org.hisp.dhis.organisationunit.OrganisationUnitGroupService" )
 @Transactional
 public class DefaultOrganisationUnitGroupService
     implements OrganisationUnitGroupService
@@ -51,17 +55,16 @@ public class DefaultOrganisationUnitGroupService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private OrganisationUnitGroupStore organisationUnitGroupStore;
+    private final OrganisationUnitGroupStore organisationUnitGroupStore;
 
-    public void setOrganisationUnitGroupStore( OrganisationUnitGroupStore organisationUnitGroupStore )
-    {
+    private final OrganisationUnitGroupSetStore organisationUnitGroupSetStore;
+
+    public DefaultOrganisationUnitGroupService(OrganisationUnitGroupStore organisationUnitGroupStore, OrganisationUnitGroupSetStore organisationUnitGroupSetStore) {
+
+        checkNotNull( organisationUnitGroupSetStore );
+        checkNotNull( organisationUnitGroupStore );
+
         this.organisationUnitGroupStore = organisationUnitGroupStore;
-    }
-
-    private OrganisationUnitGroupSetStore organisationUnitGroupSetStore;
-
-    public void setOrganisationUnitGroupSetStore( OrganisationUnitGroupSetStore organisationUnitGroupSetStore )
-    {
         this.organisationUnitGroupSetStore = organisationUnitGroupSetStore;
     }
 

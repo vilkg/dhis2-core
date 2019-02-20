@@ -29,11 +29,18 @@ package org.hisp.dhis.programrule.hibernate;
  */
 
 import com.google.common.collect.ImmutableMap;
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.cache.RepoCacheable;
+import org.hisp.dhis.deletedobject.DeletedObjectService;
 import org.hisp.dhis.programrule.ProgramRule;
 import org.hisp.dhis.programrule.ProgramRuleAction;
 import org.hisp.dhis.programrule.ProgramRuleActionStore;
 import org.hisp.dhis.programrule.ProgramRuleActionType;
+import org.hisp.dhis.security.acl.AclService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.util.ArrayList;
@@ -42,6 +49,8 @@ import java.util.List;
 /**
  * @author markusbekken
  */
+@Repository("org.hisp.dhis.programrule.ProgramRuleActionStore")
+@RepoCacheable
 public class HibernateProgramRuleActionStore
     extends HibernateIdentifiableObjectStore<ProgramRuleAction>
     implements ProgramRuleActionStore
@@ -52,6 +61,13 @@ public class HibernateProgramRuleActionStore
         .put( ProgramRuleActionType.HIDESECTION, "programStageSection" )
         .put( ProgramRuleActionType.HIDEPROGRAMSTAGE, "programStage" )
         .build();
+
+    public HibernateProgramRuleActionStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
+        CurrentUserService currentUserService,
+        DeletedObjectService deletedObjectService, AclService aclService )
+    {
+        super( sessionFactory, jdbcTemplate, ProgramRuleAction.class, currentUserService, deletedObjectService, aclService );
+    }
 
     @Override
     public List<ProgramRuleAction> get( ProgramRule programRule )

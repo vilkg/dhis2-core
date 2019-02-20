@@ -49,7 +49,9 @@ import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.version.VersionService;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
@@ -63,6 +65,7 @@ import static org.hisp.dhis.commons.util.TextUtils.joinHyphen;
 /**
  * @author Torgeir Lorange Ostby
  */
+@Service( "org.hisp.dhis.organisationunit.OrganisationUnitService" )
 @Transactional
 public class DefaultOrganisationUnitService
     implements OrganisationUnitService
@@ -74,51 +77,45 @@ public class DefaultOrganisationUnitService
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
-    private Environment env;
+    private final Environment env;
 
-    public void setEnv(Environment env) {
-        this.env = env;
-    }
+    private final OrganisationUnitStore organisationUnitStore;
 
-    private OrganisationUnitStore organisationUnitStore;
+    private final DataSetService dataSetService;
 
-    public void setOrganisationUnitStore( OrganisationUnitStore organisationUnitStore )
-    {
-        this.organisationUnitStore = organisationUnitStore;
-    }
-
-    private DataSetService dataSetService;
-
-    public void setDataSetService( DataSetService dataSetService )
-    {
-        this.dataSetService = dataSetService;
-    }
-
-    private OrganisationUnitLevelStore organisationUnitLevelStore;
-
-    public void setOrganisationUnitLevelStore( OrganisationUnitLevelStore organisationUnitLevelStore )
-    {
-        this.organisationUnitLevelStore = organisationUnitLevelStore;
-    }
+    private final OrganisationUnitLevelStore organisationUnitLevelStore;
 
     private CurrentUserService currentUserService;
 
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
+    private final VersionService versionService;
+
+    private final ConfigurationService configurationService;
+
+    /**
+     * Used only for testing, remove when test is refactored
+     */
+    @Deprecated
+    public void setCurrentUserService(CurrentUserService currentUserService) {
         this.currentUserService = currentUserService;
     }
 
-    private VersionService versionService;
-
-    public void setVersionService( VersionService versionService )
+    /**
+     * The @Lazy annotation is required to avoid the following error:
+     *
+     * `Requested bean is currently in creation: Is there an unresolvable circular reference?`
+     *
+     */
+    public DefaultOrganisationUnitService( Environment env, OrganisationUnitStore organisationUnitStore,
+        @Lazy DataSetService dataSetService, OrganisationUnitLevelStore organisationUnitLevelStore,
+        CurrentUserService currentUserService, VersionService versionService,
+        ConfigurationService configurationService )
     {
+        this.env = env;
+        this.organisationUnitStore = organisationUnitStore;
+        this.dataSetService = dataSetService;
+        this.organisationUnitLevelStore = organisationUnitLevelStore;
+        this.currentUserService = currentUserService;
         this.versionService = versionService;
-    }
-
-    private ConfigurationService configurationService;
-
-    public void setConfigurationService( ConfigurationService configurationService )
-    {
         this.configurationService = configurationService;
     }
 
@@ -354,9 +351,11 @@ public class DefaultOrganisationUnitService
     }
 
     @Override
-    public List<OrganisationUnit> getOrganisationUnitsAtOrgUnitLevels( Collection<OrganisationUnitLevel> levels, Collection<OrganisationUnit> parents )
+    public List<OrganisationUnit> getOrganisationUnitsAtOrgUnitLevels( Collection<OrganisationUnitLevel> levels,
+        Collection<OrganisationUnit> parents )
     {
-        return getOrganisationUnitsAtLevels( levels.stream().map( l -> l.getLevel() ).collect( Collectors.toList() ), parents );
+        return getOrganisationUnitsAtLevels(
+            levels.stream().map( OrganisationUnitLevel::getLevel ).collect( Collectors.toList() ), parents );
     }
 
     @Override
@@ -452,7 +451,7 @@ public class DefaultOrganisationUnitService
     {
         OrganisationUnit organisationUnit = organisationUnitStore.getByUid( uid );
 
-        return organisationUnit != null ? organisationUnit.isDescendant( organisationUnits ) : false;
+        return organisationUnit != null && organisationUnit.isDescendant(organisationUnits);
     }
 
     // -------------------------------------------------------------------------
@@ -675,7 +674,7 @@ public class DefaultOrganisationUnitService
     {
         if ( level.matches( ExpressionService.INT_EXPRESSION ) )
         {
-            Integer orgUnitLevel = Integer.parseInt( level );
+            int orgUnitLevel = Integer.parseInt( level );
 
             return orgUnitLevel > 0 ? orgUnitLevel : null;
         }
@@ -758,7 +757,7 @@ public class DefaultOrganisationUnitService
 
             if ( topOrgUnit != null )
             {
-                List<OrganisationUnit> orgUnitChildren = new ArrayList<>();
+                List<OrganisationUnit> orgUnitChildren;
 
                 if ( targetLevel != null )
                 {

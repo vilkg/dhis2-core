@@ -29,7 +29,8 @@ package org.hisp.dhis.predictor;
  */
 
 import org.hisp.dhis.common.IdentifiableObjectStore;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
@@ -37,16 +38,18 @@ import java.util.List;
  * @author Ken Haase
  * @author Jim Grace
  */
+@Service( "org.hisp.dhis.predictor.PredictorService" )
 public class DefaultPredictorService
     implements PredictorService
 {
-    @Autowired
-    private PredictorStore predictorStore;
+    private final PredictorStore predictorStore;
 
-    private IdentifiableObjectStore<PredictorGroup> predictorGroupStore;
+    private final IdentifiableObjectStore<PredictorGroup> predictorGroupStore;
 
-    public void setPredictorGroupStore( IdentifiableObjectStore<PredictorGroup> predictorGroupStore )
+    public DefaultPredictorService( PredictorStore predictorStore,
+        @Qualifier( "org.hisp.dhis.predictor.PredictorGroupStore" ) IdentifiableObjectStore<PredictorGroup> predictorGroupStore )
     {
+        this.predictorStore = predictorStore;
         this.predictorGroupStore = predictorGroupStore;
     }
 

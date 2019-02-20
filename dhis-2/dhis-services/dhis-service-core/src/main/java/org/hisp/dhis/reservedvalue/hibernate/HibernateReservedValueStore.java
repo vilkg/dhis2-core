@@ -28,6 +28,7 @@ package org.hisp.dhis.reservedvalue.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hisp.dhis.common.Objects;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
@@ -37,6 +38,8 @@ import org.hisp.dhis.reservedvalue.ReservedValueStore;
 import org.hisp.quick.BatchHandler;
 import org.hisp.quick.BatchHandlerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -49,6 +52,7 @@ import static org.hisp.dhis.common.Objects.TRACKEDENTITYATTRIBUTE;
 /**
  * @author Stian Sandvold
  */
+@Repository("org.hisp.dhis.reservedvalue.ReservedValueStore")
 @Transactional
 public class HibernateReservedValueStore
     extends HibernateGenericStore<ReservedValue>
@@ -57,6 +61,10 @@ public class HibernateReservedValueStore
 
     @Autowired
     private BatchHandlerFactory batchHandlerFactory;
+
+    public HibernateReservedValueStore(SessionFactory sessionFactory, JdbcTemplate jdbcTemplate) {
+        super(sessionFactory, jdbcTemplate, ReservedValue.class);
+    }
 
     @Override
     public List<ReservedValue> reserveValues( ReservedValue reservedValue,

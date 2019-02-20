@@ -31,11 +31,16 @@ package org.hisp.dhis.user;
 import java.util.List;
 
 import org.hisp.dhis.common.GenericStore;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
+@Service( "org.hisp.dhis.user.UserGroupAccessService" )
 @Transactional
 public class DefaultUserGroupAccessService implements UserGroupAccessService
 {
@@ -44,9 +49,11 @@ public class DefaultUserGroupAccessService implements UserGroupAccessService
     // -------------------------------------------------------------------------
 
     private GenericStore<UserGroupAccess> userGroupAccessStore;
-
-    public void setUserGroupAccessStore( GenericStore<UserGroupAccess> userGroupAccessStore )
+    
+    public DefaultUserGroupAccessService( @Qualifier( "org.hisp.dhis.user.UserGroupAccessStore" ) GenericStore<UserGroupAccess> userGroupAccessStore )
     {
+        checkNotNull( userGroupAccessStore );
+
         this.userGroupAccessStore = userGroupAccessStore;
     }
 

@@ -28,6 +28,7 @@ package org.hisp.dhis.analytics.event.data;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hisp.dhis.analytics.AnalyticsMetaDataKey.DIMENSIONS;
 import static org.hisp.dhis.analytics.AnalyticsMetaDataKey.ITEMS;
 import static org.hisp.dhis.analytics.AnalyticsMetaDataKey.ORG_UNIT_HIERARCHY;
@@ -115,14 +116,15 @@ import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.util.Timer;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.google.common.collect.Lists;
 import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Lars Helge Overland
  */
+@Service( "org.hisp.dhis.analytics.event.EventAnalyticsService" )
 public class DefaultEventAnalyticsService
     implements EventAnalyticsService
 {
@@ -146,41 +148,63 @@ public class DefaultEventAnalyticsService
     private static final int MAX_CACHE_ENTRIES = 20000;
     private static final String CACHE_REGION = "eventAnalyticsQueryResponse";
 
-    @Autowired
-    private DataElementService dataElementService;
+    private final DataElementService dataElementService;
 
-    @Autowired
-    private TrackedEntityAttributeService trackedEntityAttributeService;
+    private final TrackedEntityAttributeService trackedEntityAttributeService;
 
-    @Autowired
-    private EventAnalyticsManager eventAnalyticsManager;
+    private final EventAnalyticsManager eventAnalyticsManager;
 
-    @Autowired
-    private EnrollmentAnalyticsManager enrollmentAnalyticsManager;
+    private final EnrollmentAnalyticsManager enrollmentAnalyticsManager;
 
-    @Autowired
-    private EventDataQueryService eventDataQueryService;
+    private final EventDataQueryService eventDataQueryService;
 
-    @Autowired
-    private AnalyticsSecurityManager securityManager;
+    private final AnalyticsSecurityManager securityManager;
 
-    @Autowired
-    private EventQueryPlanner queryPlanner;
+    private final EventQueryPlanner queryPlanner;
 
-    @Autowired
-    private EventQueryValidator queryValidator;
+    private final EventQueryValidator queryValidator;
 
-    @Autowired
-    private DatabaseInfo databaseInfo;
+    private final DatabaseInfo databaseInfo;
 
-    @Autowired
-    private DhisConfigurationProvider dhisConfig;
+    private final DhisConfigurationProvider dhisConfig;
 
-    @Autowired
-    private CacheProvider cacheProvider;
+    private final CacheProvider cacheProvider;
 
-    @Autowired
-    private Environment environment;
+    private final Environment environment;
+
+    public DefaultEventAnalyticsService( DataElementService dataElementService,
+        TrackedEntityAttributeService trackedEntityAttributeService, EventAnalyticsManager eventAnalyticsManager,
+        EnrollmentAnalyticsManager enrollmentAnalyticsManager, EventDataQueryService eventDataQueryService,
+        AnalyticsSecurityManager securityManager, EventQueryPlanner queryPlanner, EventQueryValidator queryValidator,
+        DatabaseInfo databaseInfo, DhisConfigurationProvider dhisConfig, CacheProvider cacheProvider,
+        Environment environment )
+    {
+        checkNotNull( dataElementService );
+        checkNotNull( trackedEntityAttributeService );
+        checkNotNull( eventAnalyticsManager );
+        checkNotNull( enrollmentAnalyticsManager );
+        checkNotNull( eventDataQueryService );
+        checkNotNull( securityManager );
+        checkNotNull( queryPlanner );
+        checkNotNull( queryValidator );
+        checkNotNull( databaseInfo );
+        checkNotNull( dhisConfig );
+        checkNotNull( cacheProvider );
+        checkNotNull( environment );
+        
+        this.dataElementService = dataElementService;
+        this.trackedEntityAttributeService = trackedEntityAttributeService;
+        this.eventAnalyticsManager = eventAnalyticsManager;
+        this.enrollmentAnalyticsManager = enrollmentAnalyticsManager;
+        this.eventDataQueryService = eventDataQueryService;
+        this.securityManager = securityManager;
+        this.queryPlanner = queryPlanner;
+        this.queryValidator = queryValidator;
+        this.databaseInfo = databaseInfo;
+        this.dhisConfig = dhisConfig;
+        this.cacheProvider = cacheProvider;
+        this.environment = environment;
+    }
 
     // -------------------------------------------------------------------------
     // EventAnalyticsService implementation
@@ -454,7 +478,7 @@ public class DefaultEventAnalyticsService
         if ( dhisConfig.isAnalyticsCacheEnabled() )
         {
             final EventQueryParams query = new EventQueryParams.Builder( params ).build();
-            return queryCache.get( query.getKey(), key -> getAggregatedEventDataGrid( query ) ).orElseGet( () -> new ListGrid() );
+            return queryCache.get( query.getKey(), key -> getAggregatedEventDataGrid( query ) ).orElseGet(ListGrid::new);
         }
 
         return getAggregatedEventDataGrid( params );
@@ -640,7 +664,7 @@ public class DefaultEventAnalyticsService
 
         if ( params.hasDataIdScheme() )
         {
-            substituteData( params, grid );
+            substituteData( grid );
         }
 
         // ---------------------------------------------------------------------
@@ -657,7 +681,7 @@ public class DefaultEventAnalyticsService
         return grid;
     }
 
-    private void substituteData( EventQueryParams params, Grid grid )
+    private void substituteData( Grid grid )
     {
         for ( int i = 0; i < grid.getHeaders().size(); i++ )
         {
@@ -796,17 +820,14 @@ public class DefaultEventAnalyticsService
             metadataItemMap.put( value.getUid(), new MetadataItem( value.getDisplayProperty( params.getDisplayProperty() ), includeDetails ? value.getUid() : null, value.getCode() ) );
         }
 
-        params.getItemLegends().forEach( legend -> {
-            metadataItemMap.put( legend.getUid(), new MetadataItem( legend.getDisplayName(), includeDetails ? legend.getUid() : null, legend.getCode() ) );
-        } );
+        params.getItemLegends().forEach( legend -> metadataItemMap.put( legend.getUid(),
+            new MetadataItem( legend.getDisplayName(), includeDetails ? legend.getUid() : null, legend.getCode() ) ) );
 
-        params.getItemOptions().forEach( option -> {
-            metadataItemMap.put( option.getUid(), new MetadataItem( option.getDisplayName(), includeDetails ? option.getUid() : null, option.getCode() ) );
-        } );
+        params.getItemOptions().forEach( option -> metadataItemMap.put( option.getUid(),
+            new MetadataItem( option.getDisplayName(), includeDetails ? option.getUid() : null, option.getCode() ) ) );
 
-        params.getItemsAndItemFilters().forEach( item -> {
-            metadataItemMap.put( item.getItemId(), new MetadataItem( item.getItem().getDisplayName(), includeDetails ? item.getItem() : null ) );
-        } );
+        params.getItemsAndItemFilters().forEach( item -> metadataItemMap.put( item.getItemId(),
+            new MetadataItem( item.getItem().getDisplayName(), includeDetails ? item.getItem() : null ) ) );
 
         return metadataItemMap;
     }

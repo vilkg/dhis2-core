@@ -38,7 +38,8 @@ import org.hisp.dhis.common.IdentifiableObjectStore;
 import org.hisp.dhis.commons.util.DebugUtils;
 import org.hisp.dhis.schema.NodePropertyIntrospectorService;
 import org.hisp.dhis.schema.Property;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.lang.reflect.Field;
@@ -50,26 +51,32 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hisp.dhis.scheduling.JobType.values;
 
 /**
  * @author Henning Håkonsen
  */
+@Service( "jobConfigurationService" )
 @Transactional
 public class DefaultJobConfigurationService
     implements JobConfigurationService
 {
     private Log log = LogFactory.getLog( DefaultJobConfigurationService.class );
 
-    private IdentifiableObjectStore<JobConfiguration> jobConfigurationStore;
+    private final IdentifiableObjectStore<JobConfiguration> jobConfigurationStore;
 
-    public void setJobConfigurationStore( IdentifiableObjectStore<JobConfiguration> jobConfigurationStore )
+    private final SessionFactory sessionFactory;
+
+    public DefaultJobConfigurationService( @Qualifier( "org.hisp.dhis.scheduling.JobConfigurationStore" ) IdentifiableObjectStore<JobConfiguration> jobConfigurationStore,
+        SessionFactory sessionFactory )
     {
-        this.jobConfigurationStore = jobConfigurationStore;
-    }
+        checkNotNull( jobConfigurationStore );
+        checkNotNull( sessionFactory );
 
-    @Autowired
-    private SessionFactory sessionFactory;
+        this.jobConfigurationStore = jobConfigurationStore;
+        this.sessionFactory = sessionFactory;
+    }
 
     @Override
     public long addJobConfiguration( JobConfiguration jobConfiguration )

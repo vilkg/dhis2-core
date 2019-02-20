@@ -46,11 +46,13 @@ import org.hisp.dhis.parser.expression.ParserException;
 import org.hisp.dhis.relationship.RelationshipTypeService;
 import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author Chau Thu Tran
  */
+@Service( "org.hisp.dhis.program.ProgramIndicatorService" )
 public class DefaultProgramIndicatorService implements ProgramIndicatorService
 {
     // -------------------------------------------------------------------------
@@ -102,8 +104,6 @@ public class DefaultProgramIndicatorService implements ProgramIndicatorService
         this.i18nManager = i18nManager;
         this.relationshipTypeService = relationshipTypeService;
     }
-
-
 
     // -------------------------------------------------------------------------
     // ProgramIndicator CRUD

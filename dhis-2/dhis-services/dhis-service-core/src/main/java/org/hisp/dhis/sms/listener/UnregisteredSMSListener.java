@@ -41,11 +41,14 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserGroup;
 import org.hisp.dhis.user.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+@Component( "org.hisp.dhis.sms.listener.UnregisteredSMSListener" )
 @Transactional
 public class UnregisteredSMSListener
     extends BaseSMSListener
@@ -57,14 +60,23 @@ public class UnregisteredSMSListener
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private SMSCommandService smsCommandService;
+    private final SMSCommandService smsCommandService;
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private MessageService messageService;
+    private final MessageService messageService;
+
+    public UnregisteredSMSListener( SMSCommandService smsCommandService, UserService userService,
+        MessageService messageService )
+    {
+        checkNotNull( smsCommandService );
+        checkNotNull( userService );
+        checkNotNull( messageService );
+
+        this.smsCommandService = smsCommandService;
+        this.userService = userService;
+        this.messageService = messageService;
+    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation

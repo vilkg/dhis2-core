@@ -28,16 +28,24 @@ package org.hisp.dhis.program.notification;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
+import org.springframework.stereotype.Component;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Created by zubair@dhis2.org on 18.01.18.
  */
+@Component( "org.hisp.dhis.program.notification.ProgramNotificationListener" )
 public class ProgramNotificationListener
 {
-    @Autowired
-    private ProgramNotificationService programNotificationService;
+    private final ProgramNotificationService programNotificationService;
+
+    public ProgramNotificationListener( ProgramNotificationService programNotificationService )
+    {
+        checkNotNull( programNotificationService );
+        this.programNotificationService = programNotificationService;
+    }
 
     @EventListener( condition = "#event.eventType.name() == 'PROGRAM_ENROLLMENT'" )
     public void onEnrollment( ProgramNotificationEvent event )

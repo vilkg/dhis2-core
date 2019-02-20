@@ -28,9 +28,14 @@ package org.hisp.dhis.dataapproval.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.dataapproval.DataApprovalLevel;
 import org.hisp.dhis.dataapproval.DataApprovalLevelStore;
+import org.hisp.dhis.deletedobject.DeletedObjectService;
+import org.hisp.dhis.security.acl.AclService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.util.List;
@@ -42,6 +47,12 @@ public class HibernateDataApprovalLevelStore
     extends HibernateIdentifiableObjectStore<DataApprovalLevel>
     implements DataApprovalLevelStore
 {
+    public HibernateDataApprovalLevelStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
+        Class<DataApprovalLevel> clazz, CurrentUserService currentUserService,
+        DeletedObjectService deletedObjectService, AclService aclService )
+    {
+        super( sessionFactory, jdbcTemplate, clazz, currentUserService, deletedObjectService, aclService );
+    }
     // -------------------------------------------------------------------------
     // DataApprovalLevelStore implementation
     // -------------------------------------------------------------------------

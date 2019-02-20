@@ -26,21 +26,34 @@ package org.hisp.dhis.trackedentitycomment.hibernate;/*
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.deletedobject.DeletedObjectService;
+import org.hisp.dhis.security.acl.AclService;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityComment;
 import org.hisp.dhis.trackedentitycomment.TrackedEntityCommentStore;
+import org.hisp.dhis.user.CurrentUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author David Katuscak
  */
-
+@Repository("org.hisp.dhis.trackedentitycomment.TrackedEntityCommentStore")
 public class HibernateTrackedEntityCommentStore
     extends HibernateIdentifiableObjectStore<TrackedEntityComment>
     implements TrackedEntityCommentStore
 {
     private static final Logger log = LoggerFactory.getLogger( HibernateTrackedEntityCommentStore.class );
+
+    public HibernateTrackedEntityCommentStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
+        CurrentUserService currentUserService, DeletedObjectService deletedObjectService, AclService aclService )
+    {
+        super( sessionFactory, jdbcTemplate, TrackedEntityComment.class, currentUserService, deletedObjectService,
+            aclService );
+    }
 
     @Override
     public boolean exists( String uid )

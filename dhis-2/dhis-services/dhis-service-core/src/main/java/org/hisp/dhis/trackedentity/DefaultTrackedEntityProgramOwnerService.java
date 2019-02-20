@@ -35,12 +35,14 @@ import org.hisp.dhis.program.ProgramService;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
  * @author Ameen Mohamed
  */
+@Service( "org.hisp.dhis.trackedentity.TrackedEntityProgramOwnerService" )
 @Transactional
 public class DefaultTrackedEntityProgramOwnerService implements TrackedEntityProgramOwnerService
 {

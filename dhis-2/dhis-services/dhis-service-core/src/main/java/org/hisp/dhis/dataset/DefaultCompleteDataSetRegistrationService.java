@@ -45,6 +45,7 @@ import org.hisp.dhis.period.Period;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -52,10 +53,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author Lars Helge Overland
  * @version $Id$
  */
+@Service( "org.hisp.dhis.dataset.CompleteDataSetRegistrationService" )
 @Transactional
 public class DefaultCompleteDataSetRegistrationService
     implements CompleteDataSetRegistrationService
@@ -64,34 +68,42 @@ public class DefaultCompleteDataSetRegistrationService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private CompleteDataSetRegistrationStore completeDataSetRegistrationStore;
+    private final CompleteDataSetRegistrationStore completeDataSetRegistrationStore;
 
-    public void setCompleteDataSetRegistrationStore( CompleteDataSetRegistrationStore completeDataSetRegistrationStore )
+    private final CategoryService categoryService;
+
+    private final DataValueService dataValueService;
+
+    private final DataSetNotificationEventPublisher notificationEventPublisher;
+
+    private final AggregateAccessManager accessManager;
+
+    private final CurrentUserService currentUserService;
+
+    private final MessageService messageService;
+
+    public DefaultCompleteDataSetRegistrationService( CompleteDataSetRegistrationStore completeDataSetRegistrationStore,
+        CategoryService categoryService, DataValueService dataValueService,
+        DataSetNotificationEventPublisher notificationEventPublisher, AggregateAccessManager accessManager,
+        CurrentUserService currentUserService, MessageService messageService )
     {
+
+        checkNotNull( completeDataSetRegistrationStore );
+        checkNotNull( categoryService );
+        checkNotNull( dataValueService );
+        checkNotNull( notificationEventPublisher );
+        checkNotNull( accessManager );
+        checkNotNull( currentUserService );
+        checkNotNull( messageService );
+
         this.completeDataSetRegistrationStore = completeDataSetRegistrationStore;
-    }
-
-    private CategoryService categoryService;
-
-    public void setCategoryService( CategoryService categoryService )
-    {
         this.categoryService = categoryService;
+        this.dataValueService = dataValueService;
+        this.notificationEventPublisher = notificationEventPublisher;
+        this.accessManager = accessManager;
+        this.currentUserService = currentUserService;
+        this.messageService = messageService;
     }
-
-    @Autowired
-    private DataValueService dataValueService;
-
-    @Autowired
-    private DataSetNotificationEventPublisher notificationEventPublisher;
-
-    @Autowired
-    private AggregateAccessManager accessManager;
-
-    @Autowired
-    private CurrentUserService currentUserService;
-
-    @Autowired
-    private MessageService messageService;
 
     // -------------------------------------------------------------------------
     // CompleteDataSetRegistrationService

@@ -35,12 +35,16 @@ import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramStageInstance;
 import org.hisp.dhis.rules.models.RuleEffect;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.util.*;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Created by zubair@dhis2.org on 23.10.17.
  */
+@Service( "org.hisp.dhis.programrule.engine.ProgramRuleEngineService" )
 public class DefaultProgramRuleEngineService 
     implements ProgramRuleEngineService
 {
@@ -50,11 +54,19 @@ public class DefaultProgramRuleEngineService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private ProgramRuleEngine programRuleEngine;
+    private final ProgramRuleEngine programRuleEngine;
 
-    @Autowired
-    private List<RuleActionImplementer> ruleActionImplementers;
+    private final List<RuleActionImplementer> ruleActionImplementers;
+
+    public DefaultProgramRuleEngineService( ProgramRuleEngine programRuleEngine,
+        List<RuleActionImplementer> ruleActionImplementers )
+    {
+        checkNotNull( programRuleEngine );
+        checkNotNull( ruleActionImplementers );
+
+        this.programRuleEngine = programRuleEngine;
+        this.ruleActionImplementers = ruleActionImplementers;
+    }
 
     @Override
     public List<RuleEffect> evaluate( ProgramInstance programInstance )

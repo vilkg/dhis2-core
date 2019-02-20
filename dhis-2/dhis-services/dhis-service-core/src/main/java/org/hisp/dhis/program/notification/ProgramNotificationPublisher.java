@@ -30,18 +30,26 @@ package org.hisp.dhis.program.notification;
 
 import org.hisp.dhis.program.ProgramInstance;
 import org.hisp.dhis.program.ProgramStageInstance;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Component;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Created by zubair@dhis2.org on 18.01.18.
  */
+@Component( "org.hisp.dhis.program.notification.ProgramNotificationPublisher" )
 public class ProgramNotificationPublisher
 {
-    @Autowired
-    private ApplicationEventPublisher publisher;
+    private final ApplicationEventPublisher publisher;
 
-    public void publishEnrollment( ProgramInstance programInstance, ProgramNotificationEventType eventType )
+    public ProgramNotificationPublisher( ApplicationEventPublisher publisher )
+    {
+        checkNotNull( publisher );
+        this.publisher = publisher;
+    }
+
+    public void publishEnrollment(ProgramInstance programInstance, ProgramNotificationEventType eventType )
     {
         ProgramNotificationEvent event = new ProgramNotificationEvent( this, programInstance, eventType );
 

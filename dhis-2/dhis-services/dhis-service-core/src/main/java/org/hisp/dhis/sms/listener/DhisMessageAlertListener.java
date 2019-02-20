@@ -43,24 +43,36 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserGroup;
 import org.jfree.util.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.Resource;
 import java.util.*;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+@Component( "org.hisp.dhis.sms.listener.DhisMessageAlertListener" )
 @Transactional
 public class DhisMessageAlertListener
     extends BaseSMSListener
 {
-    @Autowired
-    private SMSCommandService smsCommandService;
+    private final SMSCommandService smsCommandService;
 
-    @Autowired
-    private MessageService messageService;
+    private final MessageService messageService;
 
-    @Autowired
-    @Resource( name = "smsMessageSender" )
-    private MessageSender smsSender;
+    private final MessageSender smsSender;
+
+    public DhisMessageAlertListener( SMSCommandService smsCommandService, MessageService messageService,
+        @Qualifier( "smsMessageSender" ) MessageSender smsSender )
+    {
+        checkNotNull( smsCommandService );
+        checkNotNull( messageService );
+        checkNotNull( smsSender );
+        this.smsCommandService = smsCommandService;
+        this.messageService = messageService;
+        this.smsSender = smsSender;
+    }
 
     @Override
     protected SMSCommand getSMSCommand( IncomingSms sms )

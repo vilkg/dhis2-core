@@ -92,8 +92,8 @@ public abstract class SmsGateway
 
     public HttpStatus send( String urlTemplate, HttpEntity<?> request, Class<?> klass )
     {
-        ResponseEntity<?> response = null;
-        HttpStatus statusCode = null;
+        ResponseEntity<?> response;
+        HttpStatus statusCode;
 
         try
         {

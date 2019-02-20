@@ -55,10 +55,12 @@ import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.ProgramIndicator;
 
 import com.google.common.collect.Sets;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Markus Bekken
  */
+@Component( "org.hisp.dhis.analytics.event.EnrollmentAnalyticsManager" )
 public class JdbcEnrollmentAnalyticsManager
     extends AbstractJdbcEventAnalyticsManager
         implements EnrollmentAnalyticsManager

@@ -53,19 +53,26 @@ import org.hisp.dhis.system.util.MathUtils;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import com.google.common.collect.ImmutableSet;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author Abyot Asalefew
  */
+@Service( "org.hisp.dhis.trackedentity.TrackedEntityAttributeService" )
 @Transactional
 public class DefaultTrackedEntityAttributeService
-    implements TrackedEntityAttributeService
+    implements TrackedEntityAttributeService, ApplicationContextAware
 {
     private static final int VALUE_MAX_LENGTH = 50000;
 
@@ -76,29 +83,43 @@ public class DefaultTrackedEntityAttributeService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
     private TrackedEntityAttributeStore attributeStore;
 
-    @Autowired
     private ProgramService programService;
 
-    @Autowired
     private TrackedEntityTypeService trackedEntityTypeService;
 
-    @Autowired
     private FileResourceService fileResourceService;
 
-    @Autowired
     private UserService userService;
 
-    @Autowired
     private ApplicationContext applicationContext;
 
-    @Autowired
     private CurrentUserService currentUserService;
 
-    @Autowired
     private AclService aclService;
+
+    public DefaultTrackedEntityAttributeService( TrackedEntityAttributeStore attributeStore,
+        ProgramService programService, TrackedEntityTypeService trackedEntityTypeService,
+        FileResourceService fileResourceService, UserService userService, CurrentUserService currentUserService,
+        AclService aclService )
+    {
+        checkNotNull( attributeStore );
+        checkNotNull( programService );
+        checkNotNull( trackedEntityTypeService );
+        checkNotNull( fileResourceService );
+        checkNotNull( userService );
+        checkNotNull( currentUserService );
+        checkNotNull( aclService );
+
+        this.attributeStore = attributeStore;
+        this.programService = programService;
+        this.trackedEntityTypeService = trackedEntityTypeService;
+        this.fileResourceService = fileResourceService;
+        this.userService = userService;
+        this.currentUserService = currentUserService;
+        this.aclService = aclService;
+    }
 
     // -------------------------------------------------------------------------
     // Implementation methods
@@ -209,7 +230,8 @@ public class DefaultTrackedEntityAttributeService
 
         // TODO re-factor to avoid circular dependency
 
-        TrackedEntityInstanceService trackedEntityInstanceService = (TrackedEntityInstanceService) applicationContext.getBean( TrackedEntityInstanceService.class );
+        TrackedEntityInstanceService trackedEntityInstanceService = applicationContext
+            .getBean( TrackedEntityInstanceService.class );
 
         Grid instances = trackedEntityInstanceService.getTrackedEntityInstancesGrid( params );
 
@@ -335,5 +357,10 @@ public class DefaultTrackedEntityAttributeService
         }
 
         return null;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }

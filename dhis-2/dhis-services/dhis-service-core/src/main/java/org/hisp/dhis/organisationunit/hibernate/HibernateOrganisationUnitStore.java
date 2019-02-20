@@ -33,21 +33,27 @@ import org.apache.commons.logging.LogFactory;
  */
 
 import org.hibernate.Session;
+import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.commons.util.SqlHelper;
 import org.hisp.dhis.commons.util.TextUtils;
+import org.hisp.dhis.cache.RepoCacheable;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dbms.DbmsManager;
+import org.hisp.dhis.deletedobject.DeletedObjectService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.organisationunit.OrganisationUnitHierarchy;
 import org.hisp.dhis.organisationunit.OrganisationUnitQueryParams;
 import org.hisp.dhis.organisationunit.OrganisationUnitStore;
+import org.hisp.dhis.security.acl.AclService;
 import org.hisp.dhis.system.objectmapper.OrganisationUnitRelationshipRowMapper;
 import org.hisp.dhis.system.util.SqlUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCallbackHandler;
+import org.springframework.stereotype.Repository;
 import org.springframework.util.Assert;
 
 import java.sql.ResultSet;
@@ -61,17 +67,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author Kristian Nordal
  */
+@Repository("org.hisp.dhis.organisationunit.OrganisationUnitStore")
+@RepoCacheable
 public class HibernateOrganisationUnitStore
     extends HibernateIdentifiableObjectStore<OrganisationUnit>
     implements OrganisationUnitStore
 {
     private static final Log log = LogFactory.getLog( HibernateOrganisationUnitStore.class );
 
-    @Autowired
     private DbmsManager dbmsManager;
+
+    public HibernateOrganisationUnitStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
+        CurrentUserService currentUserService, DeletedObjectService deletedObjectService,
+        AclService aclService, DbmsManager dbmsManager )
+    {
+        super( sessionFactory, jdbcTemplate, OrganisationUnit.class, currentUserService, deletedObjectService, aclService );
+
+        checkNotNull( dbmsManager );
+
+        this.dbmsManager = dbmsManager;
+    }
 
     // -------------------------------------------------------------------------
     // OrganisationUnit

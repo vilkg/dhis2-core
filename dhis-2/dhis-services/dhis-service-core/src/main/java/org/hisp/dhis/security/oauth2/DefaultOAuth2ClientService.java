@@ -29,13 +29,18 @@ package org.hisp.dhis.security.oauth2;
  */
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
+
+@Service( "oAuth2ClientService" )
 @Transactional
 public class DefaultOAuth2ClientService implements OAuth2ClientService
 {
@@ -43,8 +48,14 @@ public class DefaultOAuth2ClientService implements OAuth2ClientService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private OAuth2ClientStore oAuth2ClientStore;
+    private final OAuth2ClientStore oAuth2ClientStore;
+
+    public DefaultOAuth2ClientService( OAuth2ClientStore oAuth2ClientStore )
+    {
+        checkNotNull( oAuth2ClientStore );
+
+        this.oAuth2ClientStore = oAuth2ClientStore;
+    }
 
     // -------------------------------------------------------------------------
     // OAuth2ClientService

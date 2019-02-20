@@ -60,6 +60,8 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.springframework.beans.factory.annotation.Required;
 import org.springframework.jdbc.core.JdbcTemplate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author Lars Helge Overland
  */
@@ -69,21 +71,20 @@ public class HibernateGenericStore<T>
     private static final Log log = LogFactory.getLog( HibernateGenericStore.class );
 
     protected SessionFactory sessionFactory;
-
-    @Required
-    public void setSessionFactory( SessionFactory sessionFactory )
-    {
-        this.sessionFactory = sessionFactory;
-    }
-
     protected JdbcTemplate jdbcTemplate;
-
-    public void setJdbcTemplate( JdbcTemplate jdbcTemplate )
-    {
-        this.jdbcTemplate = jdbcTemplate;
-    }
-
     protected Class<T> clazz;
+    protected boolean cacheable = false;
+
+    public HibernateGenericStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate, Class<T> clazz )
+    {
+        checkNotNull( sessionFactory );
+        checkNotNull( jdbcTemplate );
+        checkNotNull( clazz );
+
+        this.sessionFactory = sessionFactory;
+        this.jdbcTemplate = jdbcTemplate;
+        this.clazz = clazz;
+    }
 
     /**
      * Could be overridden programmatically.
@@ -93,17 +94,6 @@ public class HibernateGenericStore<T>
     {
         return clazz;
     }
-
-    /**
-     * Could be injected through container.
-     */
-    @Required
-    public void setClazz( Class<T> clazz )
-    {
-        this.clazz = clazz;
-    }
-
-    protected boolean cacheable = false;
 
     /**
      * Could be overridden programmatically.

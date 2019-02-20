@@ -46,14 +46,17 @@ import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.Clock;
 import org.hisp.dhis.system.util.CodecUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.RestTemplate;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author David Katuscak
  */
+@Component
 public class EventSynchronization
 {
     private static final Log log = LogFactory.getLog( EventSynchronization.class );
@@ -68,10 +71,15 @@ public class EventSynchronization
 
     private final ProgramStageDataElementService programStageDataElementService;
 
-    @Autowired
     public EventSynchronization( EventService eventService, SystemSettingManager systemSettingManager, RestTemplate restTemplate, RenderService renderService,
         ProgramStageDataElementService programStageDataElementService )
     {
+        checkNotNull( eventService );
+        checkNotNull( systemSettingManager );
+        checkNotNull( renderService );
+        checkNotNull( programStageDataElementService );
+        checkNotNull( restTemplate );
+
         this.eventService = eventService;
         this.systemSettingManager = systemSettingManager;
         this.restTemplate = restTemplate;

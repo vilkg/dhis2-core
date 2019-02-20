@@ -36,8 +36,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import javax.annotation.Resource;
-
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.api.util.DateUtils;
 import org.hisp.dhis.category.CategoryOptionCombo;
@@ -65,9 +63,13 @@ import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.sms.parse.SMSParserException;
 import org.hisp.dhis.system.util.SmsUtils;
 import org.hisp.dhis.system.util.ValidationUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+@Component( "org.hisp.dhis.sms.listener.J2MEDataValueSMSListener" )
 @Transactional
 public class J2MEDataValueSMSListener
     extends BaseSMSListener
@@ -77,21 +79,33 @@ public class J2MEDataValueSMSListener
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private DataValueService dataValueService;
+    private final DataValueService dataValueService;
 
-    @Autowired
-    private CategoryService dataElementCategoryService;
+    private final CategoryService dataElementCategoryService;
 
-    @Autowired
-    private SMSCommandService smsCommandService;
+    private final SMSCommandService smsCommandService;
 
-    @Autowired
-    private CompleteDataSetRegistrationService registrationService;
+    private final CompleteDataSetRegistrationService registrationService;
 
-    @Autowired
-    @Resource( name = "smsMessageSender" )
-    private MessageSender smsSender;
+    //@Resource( name = "smsMessageSender" )
+    private final MessageSender smsSender;
+
+    public J2MEDataValueSMSListener( DataValueService dataValueService, CategoryService dataElementCategoryService,
+        SMSCommandService smsCommandService, CompleteDataSetRegistrationService registrationService,
+        @Qualifier( "smsMessageSender" ) MessageSender smsSender )
+    {
+        checkNotNull( dataValueService );
+        checkNotNull( dataElementCategoryService );
+        checkNotNull( smsCommandService );
+        checkNotNull( registrationService );
+        checkNotNull( smsSender );
+
+        this.dataValueService = dataValueService;
+        this.dataElementCategoryService = dataElementCategoryService;
+        this.smsCommandService = smsCommandService;
+        this.registrationService = registrationService;
+        this.smsSender = smsSender;
+    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation
@@ -139,8 +153,7 @@ public class J2MEDataValueSMSListener
         {
             if ( parsedMessage.containsKey( code.getCode() ) )
             {
-                storeDataValue( sms, orgUnit, parsedMessage, code, smsCommand, period,
-                    smsCommand.getDataset() );
+                storeDataValue( sms, orgUnit, parsedMessage, code, smsCommand, period );
                 valueStored = true;
             }
         }
@@ -175,9 +188,9 @@ public class J2MEDataValueSMSListener
 
     private Map<String, String> parse(String sms, SMSCommand smsCommand )
     {
-        String[] keyValuePairs = null;
+        String[] keyValuePairs;
 
-        if ( sms.indexOf( "#" ) > -1 )
+        if (sms.contains("#"))
         {
             keyValuePairs = sms.split( "#" );
         }
@@ -198,7 +211,7 @@ public class J2MEDataValueSMSListener
     }
 
     private void storeDataValue( IncomingSms sms, OrganisationUnit orgUnit, Map<String, String> parsedMessage,
-        SMSCode code, SMSCommand command, Period period, DataSet dataset )
+        SMSCode code, SMSCommand command, Period period )
     {
         String upperCaseCode = code.getCode().toUpperCase();
         String sender = sms.getOriginator();
@@ -358,7 +371,7 @@ public class J2MEDataValueSMSListener
             }
 
             int month = Integer.parseInt( periodName.substring( 0, dashIndex ) );
-            int year = Integer.parseInt( periodName.substring( dashIndex + 1, periodName.length() ) );
+            int year = Integer.parseInt( periodName.substring( dashIndex + 1) );
 
             Calendar cal = Calendar.getInstance();
             cal.set( Calendar.YEAR, year );
@@ -381,21 +394,19 @@ public class J2MEDataValueSMSListener
 
             int month = 0;
 
-            if ( periodName.substring( 0, periodName.indexOf( " " ) ).equals( "Jan" ) )
-            {
-                month = 1;
-            }
-            else if ( periodName.substring( 0, periodName.indexOf( " " ) ).equals( "Apr" ) )
-            {
-                month = 4;
-            }
-            else if ( periodName.substring( 0, periodName.indexOf( " " ) ).equals( "Jul" ) )
-            {
-                month = 6;
-            }
-            else if ( periodName.substring( 0, periodName.indexOf( " " ) ).equals( "Oct" ) )
-            {
-                month = 10;
+            switch (periodName.substring(0, periodName.indexOf(" "))) {
+                case "Jan":
+                    month = 1;
+                    break;
+                case "Apr":
+                    month = 4;
+                    break;
+                case "Jul":
+                    month = 6;
+                    break;
+                case "Oct":
+                    month = 10;
+                    break;
             }
 
             int year = Integer.parseInt( periodName.substring( periodName.lastIndexOf( " " ) + 1 ) );

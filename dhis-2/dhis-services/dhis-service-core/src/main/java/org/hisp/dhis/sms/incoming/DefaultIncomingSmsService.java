@@ -34,29 +34,33 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 import org.hisp.dhis.sms.MessageQueue;
 import org.hisp.dhis.user.User;
+import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+@Service( "org.hisp.dhis.sms.incoming.IncomingSmsService" )
 @Transactional
 public class DefaultIncomingSmsService
     implements IncomingSmsService
 {
     private static final String DEFAULT_GATEWAY = "default";
+
     // -------------------------------------------------------------------------
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private IncomingSmsStore incomingSmsStore;
+    private final IncomingSmsStore incomingSmsStore;
 
-    public void setIncomingSmsStore( IncomingSmsStore incomingSmsStore )
-    {
+    private final MessageQueue incomingSmsQueue;
+
+    public DefaultIncomingSmsService(IncomingSmsStore incomingSmsStore, MessageQueue incomingSmsQueue) {
+
+        checkNotNull( incomingSmsQueue );
+        checkNotNull( incomingSmsStore );
+
         this.incomingSmsStore = incomingSmsStore;
-    }
-
-    private MessageQueue incomingSmsQueue;
-
-    public void setIncomingSmsQueue( MessageQueue incomingSmsQueue )
-    {
         this.incomingSmsQueue = incomingSmsQueue;
     }
 

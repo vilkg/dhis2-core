@@ -28,17 +28,31 @@ package org.hisp.dhis.completeness.impl;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hisp.dhis.common.IdentifiableObjectManager;
+import org.hisp.dhis.completeness.DataSetCompletenessStore;
 import org.hisp.dhis.dataset.DataSet;
+import org.hisp.dhis.dataset.DataSetService;
+import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
+import org.hisp.dhis.period.PeriodService;
+import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 
 /**
  * @author Lars Helge Overland
  */
+@Component( "registrationDataCompletenessService" )
 public class RegistrationDataSetCompletenessService
     extends AbstractDataSetCompletenessService
 {
+    public RegistrationDataSetCompletenessService( OrganisationUnitService organisationUnitService,
+        DataSetService dataSetService, PeriodService periodService, DataSetCompletenessStore completenessStore,
+        IdentifiableObjectManager idObjectManager )
+    {
+        super( organisationUnitService, dataSetService, periodService, completenessStore, idObjectManager );
+    }
+
     @Override
     public int getRegistrations( DataSet dataSet, Collection<Long> relevantSources, Collection<Long> periods )
     {

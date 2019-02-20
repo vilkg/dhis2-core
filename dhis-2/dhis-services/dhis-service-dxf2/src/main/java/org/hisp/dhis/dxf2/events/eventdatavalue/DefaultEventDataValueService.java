@@ -46,25 +46,25 @@ import org.hisp.dhis.dxf2.importsummary.ImportStatus;
 import org.hisp.dhis.dxf2.importsummary.ImportSummary;
 import org.hisp.dhis.event.EventStatus;
 import org.hisp.dhis.eventdatavalue.EventDataValue;
-import org.hisp.dhis.program.Program;
-import org.hisp.dhis.program.ProgramStageInstance;
-import org.hisp.dhis.program.ProgramStageInstanceService;
-import org.hisp.dhis.program.ValidationStrategy;
+import org.hisp.dhis.program.*;
 import org.hisp.dhis.programrule.ProgramRuleVariableService;
 import org.hisp.dhis.programrule.engine.DataValueUpdatedEvent;
 import org.hisp.dhis.security.Authorities;
 import org.hisp.dhis.system.util.ValidationUtils;
 import org.hisp.dhis.user.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.google.common.collect.Sets;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author David Katuscak
  */
+@Service( "org.hisp.dhis.dxf2.events.eventdatavalue.EventDataValueService" )
 @Transactional
 public class DefaultEventDataValueService implements EventDataValueService
 {
@@ -76,10 +76,14 @@ public class DefaultEventDataValueService implements EventDataValueService
 
     private ProgramRuleVariableService ruleVariableService;
 
-    @Autowired
     public DefaultEventDataValueService( ApplicationEventPublisher eventPublisher, TrackerAccessManager trackerAccessManager,
         ProgramStageInstanceService programStageInstanceService, ProgramRuleVariableService ruleVariableService )
     {
+        checkNotNull( eventPublisher );
+        checkNotNull( trackerAccessManager );
+        checkNotNull( programStageInstanceService );
+        checkNotNull( ruleVariableService );
+
         this.eventPublisher = eventPublisher;
         this.trackerAccessManager = trackerAccessManager;
         this.programStageInstanceService = programStageInstanceService;
@@ -176,7 +180,7 @@ public class DefaultEventDataValueService implements EventDataValueService
     private Map<String, EventDataValue> getDataElementToEventDataValueMap(
         Collection<EventDataValue> dataValues )
     {
-        return dataValues.stream().collect( Collectors.toMap( dv -> dv.getDataElement(), dv -> dv ) );
+        return dataValues.stream().collect( Collectors.toMap(EventDataValue::getDataElement, dv -> dv ) );
     }
 
     private boolean doValidationOfMandatoryAttributes( User user )
@@ -192,14 +196,14 @@ public class DefaultEventDataValueService implements EventDataValueService
         {
             //I am filling the set only if I know that I will do the validation. Otherwise, it would be waste of resources
             Set<String>  mandatoryDataElements = programStageInstance.getProgramStage().getProgramStageDataElements().stream()
-                .filter( psde -> psde.isCompulsory() )
+                .filter(ProgramStageDataElement::isCompulsory)
                 .map( psde -> psde.getDataElement().getUid() )
                 .collect( Collectors.toSet() );
 
             //Collect all data elements with valid data values present in the payload
             Set<String> presentDataElements = event.getDataValues().stream()
                 .filter( dv -> dv != null && dv.getValue() != null && !dv.getValue().trim().isEmpty() && !dv.getValue().trim().equals( "null" ) )
-                .map( dv -> dv.getDataElement() )
+                .map(DataValue::getDataElement)
                 .collect( Collectors.toSet());
 
             // When the request is update, then only changed data values can be in the payload and so I should take into

@@ -55,6 +55,7 @@ import org.hisp.dhis.metadata.version.VersionType;
 import org.hisp.dhis.node.NodeService;
 import org.hisp.dhis.node.types.RootNode;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
@@ -62,6 +63,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  * @author aamerm
  */
+@Service( "org.hisp.dhis.metadata.version.MetadataVersionService" )
 @Transactional
 public class
 DefaultMetadataVersionService

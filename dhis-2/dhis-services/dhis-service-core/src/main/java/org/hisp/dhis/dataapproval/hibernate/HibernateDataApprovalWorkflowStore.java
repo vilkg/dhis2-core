@@ -28,9 +28,14 @@ package org.hisp.dhis.dataapproval.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.dataapproval.DataApprovalWorkflow;
 import org.hisp.dhis.dataapproval.DataApprovalWorkflowStore;
+import org.hisp.dhis.deletedobject.DeletedObjectService;
+import org.hisp.dhis.security.acl.AclService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
  * @author Jim Grace
@@ -39,4 +44,10 @@ public class HibernateDataApprovalWorkflowStore
     extends HibernateIdentifiableObjectStore<DataApprovalWorkflow>
     implements DataApprovalWorkflowStore
 {
+    public HibernateDataApprovalWorkflowStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
+        Class<DataApprovalWorkflow> clazz, CurrentUserService currentUserService,
+        DeletedObjectService deletedObjectService, AclService aclService )
+    {
+        super( sessionFactory, jdbcTemplate, clazz, currentUserService, deletedObjectService, aclService );
+    }
 }

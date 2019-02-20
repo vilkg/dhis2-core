@@ -37,7 +37,7 @@ import org.hisp.dhis.sms.command.SMSCommandService;
 import org.hisp.dhis.sms.incoming.IncomingSms;
 import org.hisp.dhis.sms.parse.ParserType;
 import org.hisp.dhis.system.util.SmsUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -45,9 +45,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Zubair <rajazubair.asghar@gmail.com>
  */
+@Component( "org.hisp.dhis.sms.listener.SingleEventListener" )
 @Transactional
 public class SingleEventListener
     extends BaseSMSListener
@@ -56,11 +59,18 @@ public class SingleEventListener
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private SMSCommandService smsCommandService;
+    private final SMSCommandService smsCommandService;
 
-    @Autowired
-    private ProgramInstanceService programInstanceService;
+    private final ProgramInstanceService programInstanceService;
+
+    public SingleEventListener( SMSCommandService smsCommandService, ProgramInstanceService programInstanceService )
+    {
+        checkNotNull( smsCommandService );
+        checkNotNull( programInstanceService );
+
+        this.smsCommandService = smsCommandService;
+        this.programInstanceService = programInstanceService;
+    }
 
     // -------------------------------------------------------------------------
     // Implementation

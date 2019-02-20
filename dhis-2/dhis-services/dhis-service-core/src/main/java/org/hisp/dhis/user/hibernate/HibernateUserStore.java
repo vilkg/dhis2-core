@@ -28,15 +28,18 @@ package org.hisp.dhis.user.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hisp.dhis.common.IdentifiableObjectUtils;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.commons.util.SqlHelper;
 import org.hisp.dhis.commons.util.TextUtils;
-import org.hisp.dhis.user.User;
-import org.hisp.dhis.user.UserInvitationStatus;
-import org.hisp.dhis.user.UserQueryParams;
-import org.hisp.dhis.user.UserStore;
+import org.hisp.dhis.cache.RepoCacheable;
+import org.hisp.dhis.deletedobject.DeletedObjectService;
+import org.hisp.dhis.security.acl.AclService;
+import org.hisp.dhis.user.*;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
@@ -45,10 +48,18 @@ import java.util.Set;
 /**
  * @author Nguyen Hong Duc
  */
+@Repository("org.hisp.dhis.user.UserStore")
+@RepoCacheable
 public class HibernateUserStore
     extends HibernateIdentifiableObjectStore<User>
     implements UserStore
 {
+    public HibernateUserStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
+        CurrentUserService currentUserService, DeletedObjectService deletedObjectService, AclService aclService )
+    {
+        super( sessionFactory, jdbcTemplate, User.class, currentUserService, deletedObjectService, aclService );
+    }
+
     @Override
     @SuppressWarnings("unchecked")
     public List<User> getUsers( UserQueryParams params )

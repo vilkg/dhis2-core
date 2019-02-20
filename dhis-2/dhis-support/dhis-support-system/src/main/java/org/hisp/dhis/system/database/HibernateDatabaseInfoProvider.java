@@ -39,10 +39,16 @@ import org.hisp.dhis.external.conf.DhisConfigurationProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Lars Helge Overland
  */
+@Component( "databaseInfoProvider" )
 public class HibernateDatabaseInfoProvider
     implements DatabaseInfoProvider
 {
@@ -61,15 +67,25 @@ public class HibernateDatabaseInfoProvider
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private DhisConfigurationProvider config;
+    
+    private final DhisConfigurationProvider config;
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private Environment environment;
+    private final Environment environment;
 
+    public HibernateDatabaseInfoProvider( DhisConfigurationProvider config, JdbcTemplate jdbcTemplate,
+        Environment environment )
+    {
+        checkNotNull( config );
+        checkNotNull( jdbcTemplate );
+        checkNotNull( environment );
+        this.config = config;
+        this.jdbcTemplate = jdbcTemplate;
+        this.environment = environment;
+    }
+    
+    @PostConstruct
     public void init()
     {
         checkDatabaseConnectivity();

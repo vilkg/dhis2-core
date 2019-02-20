@@ -47,7 +47,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 public class SqlViewServiceTest
     extends DhisSpringTest
 {
-    @Autowired
     private SqlViewService sqlViewService;
 
     private String sqlA = "SELECT   *  FROM     _categorystructure;;  ; ;;;  ;; ; ";

@@ -40,6 +40,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hisp.dhis.api.util.DateUtils;
 import org.hisp.dhis.common.AuditLogUtil;
+import org.hisp.dhis.common.BaseIdentifiableObject;
 import org.hisp.dhis.commons.filter.FilterUtils;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.feedback.ErrorCode;
@@ -50,13 +51,17 @@ import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.filter.UserAuthorityGroupCanIssueFilter;
 import org.joda.time.DateTime;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.google.common.collect.Lists;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author Chau Thu Tran
  */
+@Service( "org.hisp.dhis.user.UserService" )
 @Transactional
 public class DefaultUserService
     implements UserService
@@ -69,52 +74,38 @@ public class DefaultUserService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private UserStore userStore;
+    private final UserStore userStore;
 
-    public void setUserStore( UserStore userStore )
+    private final UserGroupService userGroupService;
+
+    private final UserCredentialsStore userCredentialsStore;
+
+    private final UserAuthorityGroupStore userAuthorityGroupStore;
+
+    private final CurrentUserService currentUserService;
+
+    private final SystemSettingManager systemSettingManager;
+
+    private final PasswordManager passwordManager;
+
+    public DefaultUserService( UserStore userStore, UserGroupService userGroupService,
+        UserCredentialsStore userCredentialsStore, UserAuthorityGroupStore userAuthorityGroupStore,
+        CurrentUserService currentUserService, SystemSettingManager systemSettingManager,
+        PasswordManager passwordManager )
     {
+        checkNotNull( userStore );
+        checkNotNull( userGroupService );
+        checkNotNull( userCredentialsStore );
+        checkNotNull( userAuthorityGroupStore );
+        checkNotNull( systemSettingManager );
+        checkNotNull( passwordManager );
+        
         this.userStore = userStore;
-    }
-
-    private UserGroupService userGroupService;
-
-    public void setUserGroupService( UserGroupService userGroupService )
-    {
         this.userGroupService = userGroupService;
-    }
-
-    private UserCredentialsStore userCredentialsStore;
-
-    public void setUserCredentialsStore( UserCredentialsStore userCredentialsStore )
-    {
         this.userCredentialsStore = userCredentialsStore;
-    }
-
-    private UserAuthorityGroupStore userAuthorityGroupStore;
-
-    public void setUserAuthorityGroupStore( UserAuthorityGroupStore userAuthorityGroupStore )
-    {
         this.userAuthorityGroupStore = userAuthorityGroupStore;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
         this.currentUserService = currentUserService;
-    }
-
-    private SystemSettingManager systemSettingManager;
-
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
-    {
         this.systemSettingManager = systemSettingManager;
-    }
-
-    private PasswordManager passwordManager;
-
-    public void setPasswordManager( PasswordManager passwordManager )
-    {
         this.passwordManager = passwordManager;
     }
 
@@ -582,7 +573,8 @@ public class DefaultUserService
         
         boolean canGrantOwnUserAuthorityGroups = (Boolean) systemSettingManager.getSystemSetting( SettingKey.CAN_GRANT_OWN_USER_AUTHORITY_GROUPS );
 
-        List<UserAuthorityGroup> roles = userAuthorityGroupStore.getByUid( user.getUserCredentials().getUserAuthorityGroups().stream().map( r -> r.getUid() ).collect( Collectors.toList() ) );
+        List<UserAuthorityGroup> roles = userAuthorityGroupStore.getByUid( user.getUserCredentials()
+            .getUserAuthorityGroups().stream().map( BaseIdentifiableObject::getUid ).collect( Collectors.toList() ) );
 
         roles.forEach( ur ->
         {

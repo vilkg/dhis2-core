@@ -36,10 +36,14 @@ import org.hisp.dhis.scheduling.JobConfiguration;
 import org.hisp.dhis.scheduling.JobType;
 import org.hisp.dhis.system.notification.Notifier;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author David Katuscak
  */
+@Component( "programDataSyncJob" )
 public class ProgramDataSynchronizationJob extends AbstractJob
 {
     private static final Log log = LogFactory.getLog( ProgramDataSynchronizationJob.class );
@@ -50,14 +54,19 @@ public class ProgramDataSynchronizationJob extends AbstractJob
     private final EventSynchronization eventSync;
 
     @Autowired
-    public ProgramDataSynchronizationJob( Notifier notifier, MessageService messageService, TrackerSynchronization trackerSync, EventSynchronization eventSync )
+    public ProgramDataSynchronizationJob( Notifier notifier, MessageService messageService,
+        TrackerSynchronization trackerSync, EventSynchronization eventSync )
     {
+        checkNotNull( notifier );
+        checkNotNull( messageService );
+        checkNotNull( trackerSync );
+        checkNotNull( eventSync );
+
         this.notifier = notifier;
         this.messageService = messageService;
         this.trackerSync = trackerSync;
         this.eventSync = eventSync;
     }
-
 
     @Override public JobType getJobType()
     {

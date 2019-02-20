@@ -73,15 +73,13 @@ import org.hisp.dhis.user.UserGroup;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
-import com.google.api.client.util.Lists;
 import com.google.common.collect.Sets;
 
 /**
- * @Author Zubair Asghar.
+ * @author Zubair Asghar.
  */
 @RunWith( MockitoJUnitRunner.class )
 public class ProgramNotificationServiceTest extends DhisConvenienceTest
@@ -116,8 +114,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
     @Mock
     private ProgramStageInstanceStore programStageInstanceStore;
 
-    @InjectMocks
-    private DefaultProgramNotificationService programNotificationService;
+    private DefaultProgramNotificationService subject;
 
     private Set<ProgramInstance> programInstances = new HashSet<>();
     private Set<ProgramStageInstance> programStageInstances = new HashSet<>();
@@ -164,9 +161,9 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
     @SuppressWarnings("unchecked")
     public void initTest()
     {
-        programNotificationService.setProgramStageNotificationRenderer( programStageNotificationMessageRenderer );
-        programNotificationService.setProgramNotificationRenderer( programNotificationMessageRenderer );
-
+        subject = new DefaultProgramNotificationService( programMessageService, messageService, programInstanceStore,
+            programStageInstanceStore, manager, programNotificationMessageRenderer,
+            programStageNotificationMessageRenderer );
         setUpInstances();
 
         BatchResponseStatus status = new BatchResponseStatus(Collections.emptyList());
@@ -181,14 +178,6 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
                 sentInternalMessages.add( new MockMessage( invocation.getArguments() ) );
                 return 40l;
             } );
-
-        when( programInstanceStore.getWithScheduledNotifications( any(), any()) )
-            .thenReturn( Lists.newArrayList( programInstances ) );
-        when( programStageInstanceStore.getWithScheduledNotifications( any(), any() ) )
-            .thenReturn( Lists.newArrayList( programStageInstances ) );
-
-        when( manager.getAll( ProgramNotificationTemplate.class ) )
-            .thenReturn( Collections.singletonList( programNotificationTemplate ) );
 
         when( programNotificationMessageRenderer.render( any(), any() ) )
             .thenReturn( notificationMessage );
@@ -206,7 +195,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
     {
         ProgramInstance programInstance = null;
 
-        programNotificationService.sendCompletionNotifications( programInstance );
+        subject.sendCompletionNotifications( programInstance );
 
         verify( manager, never() ).getAll( any() );
     }
@@ -216,7 +205,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
     {
         ProgramStageInstance programStageInstance = null;
 
-        programNotificationService.sendCompletionNotifications( programStageInstance );
+        subject.sendCompletionNotifications( programStageInstance );
 
         verify( manager, never() ).getAll( any() );
     }
@@ -224,7 +213,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
     @Test
     public void testSendCompletionNotification()
     {
-        programNotificationService.sendCompletionNotifications( programInstances.iterator().next() );
+        subject.sendCompletionNotifications( programInstances.iterator().next() );
 
         assertEquals( 1, sentProgramMessages.size() );
 
@@ -239,7 +228,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
     {
         programNotificationTemplate.setNotificationTrigger( NotificationTrigger.ENROLLMENT );
 
-        programNotificationService.sendEnrollmentNotifications( programInstances.iterator().next() );
+        subject.sendEnrollmentNotifications( programInstances.iterator().next() );
 
         assertEquals( 1, sentProgramMessages.size() );
 
@@ -255,7 +244,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
         programNotificationTemplate.setNotificationRecipient( ProgramNotificationRecipient.USER_GROUP );
         programNotificationTemplate.setRecipientUserGroup( userGroup );
 
-        programNotificationService.sendCompletionNotifications( programInstances.iterator().next() );
+        subject.sendCompletionNotifications( programInstances.iterator().next() );
 
         assertEquals( 1, sentInternalMessages.size() );
 
@@ -270,7 +259,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
     {
         programNotificationTemplate.setNotificationRecipient( ProgramNotificationRecipient.ORGANISATION_UNIT_CONTACT );
 
-        programNotificationService.sendCompletionNotifications( programInstances.iterator().next() );
+        subject.sendCompletionNotifications( programInstances.iterator().next() );
 
         assertEquals( 1, sentProgramMessages.size() );
 
@@ -287,7 +276,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
         programNotificationTemplate.setRecipientProgramAttribute( trackedEntityAttribute );
         programNotificationTemplate.setDeliveryChannels( Sets.newHashSet( DeliveryChannel.SMS ) );
 
-        programNotificationService.sendCompletionNotifications( programInstances.iterator().next() );
+        subject.sendCompletionNotifications( programInstances.iterator().next() );
 
         assertEquals( 1, sentProgramMessages.size() );
 
@@ -304,7 +293,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
         programNotificationTemplate.setRecipientProgramAttribute( trackedEntityAttribute );
         programNotificationTemplate.setDeliveryChannels( Sets.newHashSet( DeliveryChannel.EMAIL ) );
 
-        programNotificationService.sendCompletionNotifications( programInstances.iterator().next() );
+        subject.sendCompletionNotifications( programInstances.iterator().next() );
 
         assertEquals( 1, sentProgramMessages.size() );
 
@@ -323,14 +312,14 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
 
         ProgramStageInstance programStageInstance = programStageInstances.iterator().next();
 
-        programNotificationService.sendCompletionNotifications( programStageInstance );
+        subject.sendCompletionNotifications( programStageInstance );
 
         // no message when no template is attached
         assertEquals( 0, sentProgramMessages.size() );
 
         programStageInstance.getProgramStage().getNotificationTemplates().add( programNotificationTemplate );
 
-        programNotificationService.sendCompletionNotifications( programStageInstance );
+        subject.sendCompletionNotifications( programStageInstance );
 
         assertEquals( 1, sentProgramMessages.size() );
 
@@ -345,14 +334,14 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
 
         ProgramStageInstance programStageInstance = programStageInstances.iterator().next();
 
-        programNotificationService.sendCompletionNotifications( programStageInstance );
+        subject.sendCompletionNotifications( programStageInstance );
 
         // no message when no template is attached
         assertEquals( 0, sentProgramMessages.size() );
 
         programStageInstance.getProgramStage().getNotificationTemplates().add( programNotificationTemplate );
 
-        programNotificationService.sendCompletionNotifications( programStageInstance );
+        subject.sendCompletionNotifications( programStageInstance );
 
         assertEquals( 1, sentProgramMessages.size() );
     }
@@ -366,14 +355,14 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
 
         ProgramStageInstance programStageInstance = programStageInstances.iterator().next();
 
-        programNotificationService.sendCompletionNotifications( programStageInstance );
+        subject.sendCompletionNotifications( programStageInstance );
 
         // no message when no template is attached
         assertEquals( 0, sentInternalMessages.size() );
 
         programStageInstance.getProgramStage().getNotificationTemplates().add( programNotificationTemplate );
 
-        programNotificationService.sendCompletionNotifications( programStageInstance );
+        subject.sendCompletionNotifications( programStageInstance );
 
         assertEquals( 1, sentInternalMessages.size() );
 
@@ -392,7 +381,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
         ProgramStageInstance programStageInstance = programStageInstances.iterator().next();
         programStageInstance.getProgramStage().getNotificationTemplates().add( programNotificationTemplate );
 
-        programNotificationService.sendCompletionNotifications( programStageInstance );
+        subject.sendCompletionNotifications( programStageInstance );
 
         assertEquals( 1, sentInternalMessages.size() );
 
@@ -413,7 +402,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
         ProgramStageInstance programStageInstance = programStageInstances.iterator().next();
         programStageInstance.getProgramStage().getNotificationTemplates().add( programNotificationTemplate );
 
-        programNotificationService.sendCompletionNotifications( programStageInstance );
+        subject.sendCompletionNotifications( programStageInstance );
 
         assertEquals( 1, sentInternalMessages.size() );
 
@@ -438,7 +427,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
         ProgramStageInstance programStageInstance = programStageInstances.iterator().next();
         programStageInstance.getProgramStage().getNotificationTemplates().add( programNotificationTemplate );
 
-        programNotificationService.sendCompletionNotifications( programStageInstance );
+        subject.sendCompletionNotifications( programStageInstance );
 
         assertEquals( 1, sentInternalMessages.size() );
 
@@ -457,7 +446,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
         when( manager.getAll( ProgramNotificationInstance.class ) )
             .thenReturn( Collections.singletonList( programNotificationInstaceForToday ) );
 
-        programNotificationService.sendScheduledNotifications();
+        subject.sendScheduledNotifications();
 
         assertEquals( 1, sentProgramMessages.size() );
     }
@@ -467,10 +456,7 @@ public class ProgramNotificationServiceTest extends DhisConvenienceTest
     {
         sentInternalMessages.clear();
 
-        when( manager.getAll( ProgramNotificationTemplate.class ) )
-            .thenReturn( Collections.singletonList( programNotificationTemplateForYesterday ) );
-
-        programNotificationService.sendScheduledNotifications();
+        subject.sendScheduledNotifications();
 
         assertEquals( 0, sentProgramMessages.size() );
     }

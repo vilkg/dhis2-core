@@ -33,6 +33,7 @@ import org.hisp.dhis.common.IdentifiableObject;
 import org.hisp.dhis.common.comparator.LocaleNameComparator;
 import org.hisp.dhis.i18n.locale.I18nLocale;
 import org.hisp.dhis.system.util.LocaleUtils;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
@@ -43,6 +44,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+@Service( "org.hisp.dhis.i18n.118nLocaleService" )
 @Transactional
 public class DefaultI18nLocaleService
     implements I18nLocaleService
@@ -51,17 +55,18 @@ public class DefaultI18nLocaleService
     // Dependencies
     // -------------------------------------------------------------------------
 
-    private I18nLocaleStore localeStore;
+    private final I18nLocaleStore localeStore;
 
-    public void setLocaleStore( I18nLocaleStore localeStore )
-    {
-        this.localeStore = localeStore;
-    }
-    
     private Map<String, String> languages = new LinkedHashMap<>();
 
     private Map<String, String> countries = new LinkedHashMap<>();
-    
+
+    public DefaultI18nLocaleService( I18nLocaleStore localeStore )
+    {
+        checkNotNull( localeStore );
+        this.localeStore = localeStore;
+    }
+
     /**
      * Load all ISO languages and countries into mappings.
      */
@@ -183,7 +188,7 @@ public class DefaultI18nLocaleService
             locales.add( LocaleUtils.getLocale( locale.getLocale() ) );
         }
         
-        Collections.sort( locales, LocaleNameComparator.INSTANCE );
+        locales.sort(LocaleNameComparator.INSTANCE);
         
         return locales;
     }

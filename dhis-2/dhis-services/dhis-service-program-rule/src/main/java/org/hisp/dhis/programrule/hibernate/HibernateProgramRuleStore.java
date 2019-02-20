@@ -28,12 +28,19 @@ package org.hisp.dhis.programrule.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.cache.RepoCacheable;
+import org.hisp.dhis.deletedobject.DeletedObjectService;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.programrule.ProgramRule;
 import org.hisp.dhis.programrule.ProgramRuleActionType;
 import org.hisp.dhis.programrule.ProgramRuleStore;
 import org.hisp.dhis.query.JpaQueryUtils;
+import org.hisp.dhis.security.acl.AclService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.util.List;
@@ -42,10 +49,19 @@ import java.util.Set;
 /**
  * @author markusbekken
  */
+@Repository("org.hisp.dhis.programrule.ProgramRuleStore")
+@RepoCacheable
 public class HibernateProgramRuleStore
     extends HibernateIdentifiableObjectStore<ProgramRule>
     implements ProgramRuleStore
 {
+    public HibernateProgramRuleStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
+        CurrentUserService currentUserService, DeletedObjectService deletedObjectService,
+        AclService aclService )
+    {
+        super( sessionFactory, jdbcTemplate, ProgramRule.class, currentUserService, deletedObjectService, aclService );
+    }
+
     @Override
     public List<ProgramRule> get( Program program )
     {

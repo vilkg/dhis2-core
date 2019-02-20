@@ -77,6 +77,7 @@ import org.hisp.dhis.system.util.MathUtils;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import com.google.common.collect.Lists;
@@ -87,6 +88,7 @@ import com.google.common.collect.Sets;
  *
  * @author Lars Helge Overland
  */
+@Component( "org.hisp.dhis.analytics.event.EventAnalyticsManager" )
 public class JdbcEventAnalyticsManager
     extends AbstractJdbcEventAnalyticsManager
         implements EventAnalyticsManager

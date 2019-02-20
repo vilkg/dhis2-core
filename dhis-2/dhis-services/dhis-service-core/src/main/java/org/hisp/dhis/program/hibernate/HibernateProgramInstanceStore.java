@@ -42,10 +42,13 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.hisp.dhis.common.OrganisationUnitSelectionMode;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.commons.util.SqlHelper;
+import org.hisp.dhis.cache.RepoCacheable;
+import org.hisp.dhis.deletedobject.DeletedObjectService;
 import org.hisp.dhis.organisationunit.OrganisationUnit;
 import org.hisp.dhis.program.Program;
 import org.hisp.dhis.program.ProgramInstance;
@@ -54,15 +57,21 @@ import org.hisp.dhis.program.ProgramInstanceStore;
 import org.hisp.dhis.program.ProgramStatus;
 import org.hisp.dhis.program.notification.NotificationTrigger;
 import org.hisp.dhis.program.notification.ProgramNotificationTemplate;
+import org.hisp.dhis.security.acl.AclService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author Abyot Asalefew
  * @author Lars Helge Overland
  */
+@Repository("org.hisp.dhis.program.ProgramInstanceStore")
+@RepoCacheable
 public class HibernateProgramInstanceStore
     extends HibernateIdentifiableObjectStore<ProgramInstance>
     implements ProgramInstanceStore
@@ -72,6 +81,13 @@ public class HibernateProgramInstanceStore
             NotificationTrigger.getAllApplicableToProgramInstance(),
             NotificationTrigger.getAllScheduledTriggers()
         );
+
+    public HibernateProgramInstanceStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
+        CurrentUserService currentUserService, DeletedObjectService deletedObjectService, AclService aclService )
+    {
+        super( sessionFactory, jdbcTemplate, ProgramInstance.class, currentUserService, deletedObjectService,
+            aclService );
+    }
 
     @Override
     public int countProgramInstances( ProgramInstanceQueryParams params )
@@ -83,7 +99,7 @@ public class HibernateProgramInstanceStore
         return ( Integer ) query.getSingleResult();
     }
 
-    public String buildCountProgramInstanceHql( ProgramInstanceQueryParams params )
+    private String buildCountProgramInstanceHql(ProgramInstanceQueryParams params)
     {
         return buildProgramInstanceHql( params ).replaceFirst( "from ProgramInstance pi", "select count(distinct uid) from ProgramInstance pi" );
     }

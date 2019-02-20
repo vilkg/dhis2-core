@@ -47,17 +47,21 @@ import org.hisp.dhis.system.util.SmsUtils;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserSettingKey;
 import org.hisp.dhis.user.UserSettingService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
+import org.springframework.stereotype.Component;
 
 /**
  * @author Nguyen Kim Lai
  */
+@Component( "smsMessageSender" )
+@Scope( proxyMode = ScopedProxyMode.TARGET_CLASS )
 public class SmsMessageSender
     implements MessageSender
 {
@@ -81,7 +85,6 @@ public class SmsMessageSender
 
     private UserSettingService userSettingService;
 
-    @Autowired
     public SmsMessageSender( GatewayAdministrationService gatewayAdminService, List<SmsGateway> smsGateways,
         UserSettingService userSettingService )
     {
@@ -134,7 +137,7 @@ public class SmsMessageSender
     public Future<OutboundMessageResponse> sendMessageAsync( String subject, String text, String footer, User sender, Set<User> users, boolean forceSend )
     {
         OutboundMessageResponse response = sendMessage( subject, text, footer, sender, users, forceSend );
-        return new AsyncResult<OutboundMessageResponse>( response );
+        return new AsyncResult<>(response);
     }
     
     @Override

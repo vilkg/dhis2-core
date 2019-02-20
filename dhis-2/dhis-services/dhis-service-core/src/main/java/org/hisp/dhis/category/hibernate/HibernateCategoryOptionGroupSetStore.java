@@ -30,10 +30,17 @@ package org.hisp.dhis.category.hibernate;
  *
  */
 
+import org.hibernate.SessionFactory;
+import org.hisp.dhis.cache.RepoCacheable;
 import org.hisp.dhis.category.CategoryOptionGroupSet;
 import org.hisp.dhis.category.CategoryOptionGroupSetStore;
 import org.hisp.dhis.common.DataDimensionType;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.deletedobject.DeletedObjectService;
+import org.hisp.dhis.security.acl.AclService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.util.List;
@@ -41,10 +48,19 @@ import java.util.List;
 /**
  * @author Lars Helge Overland
  */
+@Repository("org.hisp.dhis.category.CategoryOptionGroupSetStore")
+@RepoCacheable
 public class HibernateCategoryOptionGroupSetStore
     extends HibernateIdentifiableObjectStore<CategoryOptionGroupSet>
     implements CategoryOptionGroupSetStore
 {
+    public HibernateCategoryOptionGroupSetStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
+        CurrentUserService currentUserService,
+        DeletedObjectService deletedObjectService, AclService aclService )
+    {
+        super( sessionFactory, jdbcTemplate, CategoryOptionGroupSet.class, currentUserService, deletedObjectService, aclService );
+    }
+
     @Override
     public List<CategoryOptionGroupSet> getCategoryOptionGroupSetsNoAcl( DataDimensionType dataDimensionType, boolean dataDimension )
     {

@@ -58,7 +58,7 @@ public interface CategoryService
      * @param category the Category to add.
      * @return a generated unique id of the added Category.
      */
-    long addCategory( Category Category );
+    long addCategory( Category category );
 
     /**
      * Updates a Category.

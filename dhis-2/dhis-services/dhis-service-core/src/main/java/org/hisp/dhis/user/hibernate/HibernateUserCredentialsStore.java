@@ -28,18 +28,29 @@ package org.hisp.dhis.user.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
+import org.hisp.dhis.cache.RepoCacheable;
 import org.hisp.dhis.hibernate.HibernateGenericStore;
 import org.hisp.dhis.user.UserCredentials;
 import org.hisp.dhis.user.UserCredentialsStore;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author Lars Helge Overland
  */
+@Repository("org.hisp.dhis.user.UserCredentialsStore")
+@RepoCacheable
 public class HibernateUserCredentialsStore
     extends HibernateGenericStore<UserCredentials>
     implements UserCredentialsStore
 {
+    public HibernateUserCredentialsStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate)
+    {
+        super( sessionFactory, jdbcTemplate, UserCredentials.class );
+    }
+
     @Override
     public UserCredentials getUserCredentialsByUsername( String username )
     {

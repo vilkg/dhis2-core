@@ -30,10 +30,17 @@ package org.hisp.dhis.category.hibernate;
  *
  */
 
+import org.hibernate.SessionFactory;
+import org.hisp.dhis.cache.RepoCacheable;
 import org.hisp.dhis.category.Category;
 import org.hisp.dhis.category.CategoryOption;
 import org.hisp.dhis.category.CategoryOptionStore;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
+import org.hisp.dhis.deletedobject.DeletedObjectService;
+import org.hisp.dhis.security.acl.AclService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Repository;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import java.util.List;
@@ -41,10 +48,19 @@ import java.util.List;
 /**
  * @author Lars Helge Overland
  */
+@Repository("org.hisp.dhis.category.CategoryOptionStore")
+@RepoCacheable
 public class HibernateCategoryOptionStore
     extends HibernateIdentifiableObjectStore<CategoryOption>
     implements CategoryOptionStore
 {
+    public HibernateCategoryOptionStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
+        CurrentUserService currentUserService, DeletedObjectService deletedObjectService,
+        AclService aclService )
+    {
+        super( sessionFactory, jdbcTemplate, CategoryOption.class, currentUserService, deletedObjectService, aclService );
+    }
+
     @Override
     public List<CategoryOption> getCategoryOptions( Category category )
     {

@@ -43,6 +43,7 @@ import org.hisp.dhis.system.util.CodecUtils;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,9 +51,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author David Katuscak
  */
+@Component
 public class TrackerSynchronization
 {
     private static final Log log = LogFactory.getLog( TrackerSynchronization.class );
@@ -65,9 +69,13 @@ public class TrackerSynchronization
 
     private final RenderService renderService;
 
-    @Autowired
     public TrackerSynchronization( TrackedEntityInstanceService teiService, SystemSettingManager systemSettingManager, RestTemplate restTemplate, RenderService renderService )
     {
+        checkNotNull( teiService );
+        checkNotNull( systemSettingManager );
+        checkNotNull( restTemplate );
+        checkNotNull( renderService );
+
         this.teiService = teiService;
         this.systemSettingManager = systemSettingManager;
         this.restTemplate = restTemplate;

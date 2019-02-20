@@ -29,10 +29,15 @@ package org.hisp.dhis.dataset.hibernate;
  */
 
 
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.common.hibernate.HibernateIdentifiableObjectStore;
 import org.hisp.dhis.dataset.DataSet;
 import org.hisp.dhis.dataset.Section;
 import org.hisp.dhis.dataset.SectionStore;
+import org.hisp.dhis.deletedobject.DeletedObjectService;
+import org.hisp.dhis.security.acl.AclService;
+import org.hisp.dhis.user.CurrentUserService;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.persistence.criteria.CriteriaBuilder;
 
@@ -43,6 +48,12 @@ import javax.persistence.criteria.CriteriaBuilder;
 public class HibernateSectionStore
     extends HibernateIdentifiableObjectStore<Section> implements SectionStore
 {
+    public HibernateSectionStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate, Class<Section> clazz,
+        CurrentUserService currentUserService, DeletedObjectService deletedObjectService, AclService aclService )
+    {
+        super( sessionFactory, jdbcTemplate, clazz, currentUserService, deletedObjectService, aclService );
+    }
+
     @Override
     public Section getSectionByName( String name, DataSet dataSet )
     {

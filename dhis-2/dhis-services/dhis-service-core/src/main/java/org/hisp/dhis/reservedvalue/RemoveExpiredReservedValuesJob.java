@@ -31,17 +31,23 @@ package org.hisp.dhis.reservedvalue;
 import org.hisp.dhis.scheduling.AbstractJob;
 import org.hisp.dhis.scheduling.JobConfiguration;
 import org.hisp.dhis.scheduling.JobType;
+import org.springframework.stereotype.Component;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Henning Håkonsen
  */
+@Component
 public class RemoveExpiredReservedValuesJob
     extends AbstractJob
 {
-    private ReservedValueStore reservedValueStore;
+    private final ReservedValueStore reservedValueStore;
 
-    public void setReservedValueStore( ReservedValueStore reservedValueStore )
+    public RemoveExpiredReservedValuesJob( ReservedValueStore reservedValueStore )
     {
+        checkNotNull( reservedValueStore );
+
         this.reservedValueStore = reservedValueStore;
     }
 

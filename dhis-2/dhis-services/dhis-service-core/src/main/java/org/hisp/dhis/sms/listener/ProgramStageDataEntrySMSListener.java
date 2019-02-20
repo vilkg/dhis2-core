@@ -47,7 +47,7 @@ import org.hisp.dhis.trackedentity.TrackedEntityAttributeService;
 import org.hisp.dhis.trackedentity.TrackedEntityInstance;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceQueryParams;
 import org.hisp.dhis.trackedentity.TrackedEntityInstanceService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -56,9 +56,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Created by zubair@dhis2.org on 11.08.17.
  */
+@Component("org.hisp.dhis.sms.listener.ProgramStageDataEntrySMSListener" )
 @Transactional
 public class ProgramStageDataEntrySMSListener
     extends BaseSMSListener
@@ -71,17 +74,28 @@ public class ProgramStageDataEntrySMSListener
     // Dependencies
     // -------------------------------------------------------------------------
 
-    @Autowired
-    private TrackedEntityInstanceService trackedEntityInstanceService;
+    private final TrackedEntityInstanceService trackedEntityInstanceService;
 
-    @Autowired
-    private TrackedEntityAttributeService trackedEntityAttributeService;
+    private final TrackedEntityAttributeService trackedEntityAttributeService;
 
-    @Autowired
-    private SMSCommandService smsCommandService;
+    private final SMSCommandService smsCommandService;
 
-    @Autowired
-    private ProgramInstanceService programInstanceService;
+    private final ProgramInstanceService programInstanceService;
+
+    public ProgramStageDataEntrySMSListener( TrackedEntityInstanceService trackedEntityInstanceService,
+        TrackedEntityAttributeService trackedEntityAttributeService, SMSCommandService smsCommandService,
+        ProgramInstanceService programInstanceService )
+    {
+        checkNotNull( trackedEntityAttributeService );
+        checkNotNull( trackedEntityInstanceService );
+        checkNotNull( smsCommandService );
+        checkNotNull( programInstanceService );
+
+        this.trackedEntityInstanceService = trackedEntityInstanceService;
+        this.trackedEntityAttributeService = trackedEntityAttributeService;
+        this.smsCommandService = smsCommandService;
+        this.programInstanceService = programInstanceService;
+    }
 
     // -------------------------------------------------------------------------
     // IncomingSmsListener implementation

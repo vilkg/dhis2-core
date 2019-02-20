@@ -46,6 +46,7 @@ import org.hisp.dhis.system.util.CodecUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RequestCallback;
@@ -53,9 +54,12 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author David Katuscak
  */
+@Component
 public class DataValueSynchronization
 {
     private static final Log log = LogFactory.getLog( DataValueSynchronization.class );
@@ -72,6 +76,11 @@ public class DataValueSynchronization
     public DataValueSynchronization( DataValueService dataValueService, DataValueSetService dataValueSetService,
         SystemSettingManager systemSettingManager, RestTemplate restTemplate )
     {
+        checkNotNull( dataValueService );
+        checkNotNull( dataValueSetService );
+        checkNotNull( systemSettingManager );
+        checkNotNull( restTemplate );
+
         this.dataValueService = dataValueService;
         this.dataValueSetService = dataValueSetService;
         this.systemSettingManager = systemSettingManager;

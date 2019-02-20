@@ -28,6 +28,7 @@ package org.hisp.dhis.dataapproval.hibernate;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hisp.dhis.dataapproval.DataApprovalState.ACCEPTED_HERE;
 import static org.hisp.dhis.dataapproval.DataApprovalState.APPROVED_ABOVE;
 import static org.hisp.dhis.dataapproval.DataApprovalState.APPROVED_HERE;
@@ -51,6 +52,7 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.hibernate.SessionFactory;
 import org.hisp.dhis.api.util.DateUtils;
 import org.hisp.dhis.cache.Cache;
 import org.hisp.dhis.cache.CacheProvider;
@@ -77,11 +79,14 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
+import org.springframework.stereotype.Repository;
 
 /**
  * @author Jim Grace
  */
+@Repository("org.hisp.dhis.dataapproval.DataApprovalStore")
 public class HibernateDataApprovalStore
     extends HibernateGenericStore<DataApproval>
     implements DataApprovalStore
@@ -95,11 +100,61 @@ public class HibernateDataApprovalStore
 
     private Cache<Boolean> IS_APPROVED_CACHE;
 
-    @Autowired
-    private CacheProvider cacheProvider;
+    // -------------------------------------------------------------------------
+    // Dependencies
+    // -------------------------------------------------------------------------
 
-    @Autowired
-    private Environment env;
+    private final CacheProvider cacheProvider;
+
+    private final PeriodService periodService;
+
+    private CurrentUserService currentUserService;
+
+    private final CategoryService categoryService;
+
+    private final DataApprovalLevelService dataApprovalLevelService;
+
+    private final SystemSettingManager systemSettingManager;
+
+    private final StatementBuilder statementBuilder;
+    
+    private final Environment env;
+
+    public HibernateDataApprovalStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
+        CacheProvider cacheProvider, PeriodService periodService,
+        CurrentUserService currentUserService, CategoryService categoryService,
+        DataApprovalLevelService dataApprovalLevelService, SystemSettingManager systemSettingManager,
+        StatementBuilder statementBuilder, Environment env )
+    {
+        super( sessionFactory, jdbcTemplate, DataApproval.class );
+
+        checkNotNull( cacheProvider );
+        checkNotNull( periodService );
+        checkNotNull( currentUserService );
+        checkNotNull( categoryService );
+        checkNotNull( dataApprovalLevelService );
+        checkNotNull( systemSettingManager );
+        checkNotNull( statementBuilder );
+        checkNotNull( env );
+
+        this.cacheProvider = cacheProvider;
+        this.periodService = periodService;
+        this.currentUserService = currentUserService;
+        this.categoryService = categoryService;
+        this.dataApprovalLevelService = dataApprovalLevelService;
+        this.systemSettingManager = systemSettingManager;
+        this.statementBuilder = statementBuilder;
+        this.env = env;
+    }
+
+    /**
+     * Used only for testing, remove when test is refactored
+     * @param currentUserService
+     */
+    @Deprecated
+    public void setCurrentUserService(CurrentUserService currentUserService) {
+        this.currentUserService = currentUserService;
+    }
 
     @PostConstruct
     public void init()
@@ -109,48 +164,6 @@ public class HibernateDataApprovalStore
             .expireAfterAccess( 12, TimeUnit.HOURS )
             .withMaximumSize( SystemUtils.isTestRun(env.getActiveProfiles()) ? 0 : 20000 ).build();
     }
-
-    // -------------------------------------------------------------------------
-    // Dependencies
-    // -------------------------------------------------------------------------
-
-    private PeriodService periodService;
-
-    public void setPeriodService( PeriodService periodService )
-    {
-        this.periodService = periodService;
-    }
-
-    private CurrentUserService currentUserService;
-
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
-
-    private CategoryService categoryService;
-
-    public void setCategoryService( CategoryService categoryService )
-    {
-        this.categoryService = categoryService;
-    }
-
-    private DataApprovalLevelService dataApprovalLevelService;
-
-    public void setDataApprovalLevelService( DataApprovalLevelService dataApprovalLevelService )
-    {
-        this.dataApprovalLevelService = dataApprovalLevelService;
-    }
-
-    private SystemSettingManager systemSettingManager;
-
-    public void setSystemSettingManager( SystemSettingManager systemSettingManager )
-    {
-        this.systemSettingManager = systemSettingManager;
-    }
-
-    @Autowired
-    private StatementBuilder statementBuilder;
 
     // -------------------------------------------------------------------------
     // DataApproval

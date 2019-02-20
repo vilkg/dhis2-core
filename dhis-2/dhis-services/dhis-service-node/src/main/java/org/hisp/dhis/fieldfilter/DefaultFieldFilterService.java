@@ -55,6 +55,7 @@ import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserCredentials;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
@@ -73,6 +74,7 @@ import java.util.stream.Stream;
 /**
  * @author Morten Olav Hansen <mortenoh@gmail.com>
  */
+@Component("org.hisp.dhis.fieldfilter.FieldFilterService")
 public class DefaultFieldFilterService implements FieldFilterService
 {
     private static final Log log = LogFactory.getLog( DefaultFieldFilterService.class );

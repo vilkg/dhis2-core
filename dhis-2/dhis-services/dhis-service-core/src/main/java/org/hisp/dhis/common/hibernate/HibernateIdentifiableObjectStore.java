@@ -32,6 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.Criteria;
+import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Criterion;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
@@ -62,7 +63,7 @@ import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserAccess;
 import org.hisp.dhis.user.UserGroupAccess;
 import org.hisp.dhis.user.UserInfo;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.util.Assert;
 
 import javax.persistence.TypedQuery;
@@ -81,6 +82,8 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author bobj
  */
@@ -89,24 +92,27 @@ public class HibernateIdentifiableObjectStore<T extends BaseIdentifiableObject>
 {
     private static final Log log = LogFactory.getLog( HibernateIdentifiableObjectStore.class );
 
-    @Autowired
     protected CurrentUserService currentUserService;
 
-    /**
-     * Allows injection (e.g. by a unit test)
-     */
-    public void setCurrentUserService( CurrentUserService currentUserService )
-    {
-        this.currentUserService = currentUserService;
-    }
+    private DeletedObjectService deletedObjectService;
 
-    @Autowired
-    protected DeletedObjectService deletedObjectService;
-
-    @Autowired
     protected AclService aclService;
 
-    private boolean transientIdentifiableProperties = false;
+    protected boolean transientIdentifiableProperties = false;
+    
+    public HibernateIdentifiableObjectStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate, Class<T> clazz,
+        CurrentUserService currentUserService, DeletedObjectService deletedObjectService, AclService aclService )
+    {
+        super( sessionFactory, jdbcTemplate, clazz );
+
+        checkNotNull( currentUserService );
+        checkNotNull( deletedObjectService );
+        checkNotNull( aclService );
+
+        this.currentUserService = currentUserService;
+        this.deletedObjectService = deletedObjectService;
+        this.aclService = aclService;
+    }
 
     /**
      * Indicates whether the object represented by the implementation does not
