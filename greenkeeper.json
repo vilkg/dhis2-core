@@ -1,0 +1,10 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "dhis-2/dhis-web/dhis-web-apps/package.json",
+        "dhis-2/dhis-web/dhis-web-commons-resources/src/main/webapp/dhis-web-commons/javascripts/dhis2/package.json"
+      ]
+    }
+  }
+}
