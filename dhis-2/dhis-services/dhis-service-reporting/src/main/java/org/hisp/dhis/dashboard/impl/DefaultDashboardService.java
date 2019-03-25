@@ -50,6 +50,7 @@ import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.user.User;
 import org.hisp.dhis.user.UserService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -87,7 +88,8 @@ public class DefaultDashboardService
 
     private final AppManager appManager;
 
-    public DefaultDashboardService( HibernateIdentifiableObjectStore<Dashboard> dashboardStore,
+    public DefaultDashboardService(
+        @Qualifier( "org.hisp.dhis.dashboard.DashboardStore" ) HibernateIdentifiableObjectStore<Dashboard> dashboardStore,
         IdentifiableObjectManager objectManager, UserService userService, DashboardItemStore dashboardItemStore,
         AppManager appManager )
     {

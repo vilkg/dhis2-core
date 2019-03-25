@@ -26,13 +26,14 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.hisp.dhis.config;
+package org.hisp.dhis.reporting.config;
 
 import com.google.common.collect.ImmutableMap;
 import org.hisp.dhis.common.ServiceProvider;
 import org.hisp.dhis.completeness.DataSetCompletenessService;
 import org.hisp.dhis.completeness.impl.CompulsoryDataSetCompletenessService;
 import org.hisp.dhis.completeness.impl.RegistrationDataSetCompletenessService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -43,7 +44,7 @@ import org.springframework.context.annotation.Configuration;
 public class ServiceConfig
 {
     @Bean( "dataCompletenessServiceProvider" )
-    public ServiceProvider<DataSetCompletenessService> serviceProvider(
+    public ServiceProvider<DataSetCompletenessService> dataCompletenessServiceProvider(
         RegistrationDataSetCompletenessService registrationDataSetCompletenessService,
         CompulsoryDataSetCompletenessService compulsoryDataSetCompletenessService )
     {

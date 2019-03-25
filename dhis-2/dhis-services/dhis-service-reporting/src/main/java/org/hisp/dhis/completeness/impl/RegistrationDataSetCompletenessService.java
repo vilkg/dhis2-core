@@ -35,6 +35,9 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Component;
 
 import java.util.Collection;
@@ -43,9 +46,11 @@ import java.util.Collection;
  * @author Lars Helge Overland
  */
 @Component( "registrationDataCompletenessService" )
+@Scope( proxyMode = ScopedProxyMode.TARGET_CLASS )
 public class RegistrationDataSetCompletenessService
     extends AbstractDataSetCompletenessService
 {
+    @Autowired
     public RegistrationDataSetCompletenessService( OrganisationUnitService organisationUnitService,
         DataSetService dataSetService, PeriodService periodService, DataSetCompletenessStore completenessStore,
         IdentifiableObjectManager idObjectManager )

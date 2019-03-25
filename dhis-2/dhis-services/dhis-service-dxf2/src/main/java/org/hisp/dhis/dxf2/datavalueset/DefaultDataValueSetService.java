@@ -122,7 +122,6 @@ import org.hisp.dhis.util.ObjectUtils;
 import org.hisp.quick.BatchHandler;
 import org.hisp.quick.BatchHandlerFactory;
 import org.hisp.staxwax.factory.XMLFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import com.csvreader.CsvReader;
 import org.springframework.stereotype.Service;
@@ -151,11 +150,11 @@ public class DefaultDataValueSetService
 
     private final DataApprovalService approvalService;
 
-    private final BatchHandlerFactory batchHandlerFactory;
+    private  BatchHandlerFactory batchHandlerFactory;
 
     private final CompleteDataSetRegistrationService registrationService;
 
-    private final CurrentUserService currentUserService;
+    private CurrentUserService currentUserService;
 
     private final DataValueSetStore dataValueSetStore;
 
@@ -167,7 +166,7 @@ public class DefaultDataValueSetService
 
     private final Notifier notifier;
 
-    protected final InputUtils inputUtils;
+    private final InputUtils inputUtils;
 
     private final CalendarService calendarService;
 
@@ -229,7 +228,25 @@ public class DefaultDataValueSetService
         this.accessManager = accessManager;
     }
 
-    // -------------------------------------------------------------------------
+    /**
+     * Used only for testing, remove when test is refactored
+     */
+    @Deprecated
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
+    /**
+     * Used only for testing, remove when test is refactored
+     */
+    @Deprecated
+    public void setBatchHandlerFactory( BatchHandlerFactory batchHandlerFactory )
+    {
+        this.batchHandlerFactory = batchHandlerFactory;
+    }
+
+// -------------------------------------------------------------------------
     // DataValueSet implementation
     // -------------------------------------------------------------------------
 

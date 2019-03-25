@@ -69,6 +69,7 @@ import org.hisp.dhis.setting.SettingKey;
 import org.hisp.dhis.setting.SystemSettingManager;
 import org.hisp.dhis.system.util.JRExportUtils;
 import org.hisp.dhis.system.velocity.VelocityManager;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.datasource.DataSourceUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -111,9 +112,11 @@ public class DefaultReportService
 
     private final SystemSettingManager systemSettingManager;
 
-    public DefaultReportService( IdentifiableObjectStore<Report> reportStore, ReportTableService reportTableService,
-        ConstantService constantService, OrganisationUnitService organisationUnitService, PeriodService periodService,
-        I18nManager i18nManager, DataSource dataSource, SystemSettingManager systemSettingManager )
+    public DefaultReportService(
+        @Qualifier( "org.hisp.dhis.report.ReportStore" ) IdentifiableObjectStore<Report> reportStore,
+        ReportTableService reportTableService, ConstantService constantService,
+        OrganisationUnitService organisationUnitService, PeriodService periodService, I18nManager i18nManager,
+        DataSource dataSource, SystemSettingManager systemSettingManager )
     {
         checkNotNull( reportStore );
         checkNotNull( reportTableService );

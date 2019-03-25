@@ -75,6 +75,7 @@ import org.jfree.data.general.DefaultValueDataset;
 import org.jfree.data.general.ValueDataset;
 import org.jfree.ui.RectangleInsets;
 import org.jfree.util.TableOrder;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -131,10 +132,11 @@ public class DefaultChartService
 
     private final EventAnalyticsService eventAnalyticsService;
 
-    public DefaultChartService( AnalyticalObjectStore<Chart> chartStore, PeriodService periodService,
-        DataValueService dataValueService, MinMaxDataElementService minMaxDataElementService,
-        CurrentUserService currentUserService, OrganisationUnitService organisationUnitService,
-        AnalyticsService analyticsService, EventAnalyticsService eventAnalyticsService )
+    public DefaultChartService( @Qualifier( "org.hisp.dhis.chart.ChartStore" ) AnalyticalObjectStore<Chart> chartStore,
+        PeriodService periodService, DataValueService dataValueService,
+        MinMaxDataElementService minMaxDataElementService, CurrentUserService currentUserService,
+        OrganisationUnitService organisationUnitService, AnalyticsService analyticsService,
+        EventAnalyticsService eventAnalyticsService )
     {
         checkNotNull( chartStore );
         checkNotNull( periodService );

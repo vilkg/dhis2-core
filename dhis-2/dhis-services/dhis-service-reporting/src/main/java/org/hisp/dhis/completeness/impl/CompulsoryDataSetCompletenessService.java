@@ -37,15 +37,20 @@ import org.hisp.dhis.dataset.DataSetService;
 import org.hisp.dhis.organisationunit.OrganisationUnitService;
 import org.hisp.dhis.period.Period;
 import org.hisp.dhis.period.PeriodService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
+import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.stereotype.Service;
 
 /**
  * @author Lars Helge Overland
  */
 @Service( "compulsoryDataCompletenessService" )
+@Scope( proxyMode = ScopedProxyMode.TARGET_CLASS )
 public class CompulsoryDataSetCompletenessService
     extends AbstractDataSetCompletenessService
 {
+    @Autowired
     public CompulsoryDataSetCompletenessService( OrganisationUnitService organisationUnitService,
         DataSetService dataSetService, PeriodService periodService, DataSetCompletenessStore completenessStore,
         IdentifiableObjectManager idObjectManager )

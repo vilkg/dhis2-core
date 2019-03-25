@@ -73,6 +73,7 @@ public class DefaultQueryValidator
     public DefaultQueryValidator( SystemSettingManager systemSettingManager )
     {
         checkNotNull( systemSettingManager );
+
         this.systemSettingManager = systemSettingManager;
     }
 

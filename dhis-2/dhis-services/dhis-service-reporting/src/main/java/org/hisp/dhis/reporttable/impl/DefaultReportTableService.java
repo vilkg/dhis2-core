@@ -40,6 +40,7 @@ import org.hisp.dhis.reporttable.ReportTableService;
 import org.hisp.dhis.system.grid.ListGrid;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.User;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,9 +77,9 @@ public class DefaultReportTableService
     private final I18nManager i18nManager;
 
     public DefaultReportTableService( AnalyticsService analyticsService,
-        AnalyticalObjectStore<ReportTable> reportTableStore, IdentifiableObjectStore<Report> reportStore,
-        OrganisationUnitService organisationUnitService, CurrentUserService currentUserService,
-        I18nManager i18nManager )
+        @Qualifier( "org.hisp.dhis.reporttable.ReportTableStore" ) AnalyticalObjectStore<ReportTable> reportTableStore,
+        @Qualifier( "org.hisp.dhis.report.ReportStore" ) IdentifiableObjectStore<Report> reportStore, OrganisationUnitService organisationUnitService,
+        CurrentUserService currentUserService, I18nManager i18nManager )
     {
         checkNotNull( analyticsService );
         checkNotNull( reportTableStore );

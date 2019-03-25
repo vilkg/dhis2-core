@@ -32,7 +32,6 @@ package org.hisp.dhis.datastatistics.hibernate;
 import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.SessionFactory;
@@ -45,7 +44,6 @@ import org.hisp.dhis.datastatistics.EventInterval;
 import org.hisp.dhis.deletedobject.DeletedObjectService;
 import org.hisp.dhis.security.acl.AclService;
 import org.hisp.dhis.user.CurrentUserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -60,11 +58,8 @@ public class HibernateDataStatisticsStore
 {
     private static final Log log = LogFactory.getLog( HibernateDataStatisticsStore.class );
 
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
     public HibernateDataStatisticsStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate,
-        Class<DataStatistics> clazz, CurrentUserService currentUserService, DeletedObjectService deletedObjectService,
+        CurrentUserService currentUserService, DeletedObjectService deletedObjectService,
         AclService aclService )
     {
         super( sessionFactory, jdbcTemplate, DataStatistics.class, currentUserService, deletedObjectService, aclService );
@@ -133,7 +128,7 @@ public class HibernateDataStatisticsStore
 
     private String getQuery( EventInterval eventInterval, Date startDate, Date endDate )
     {
-        String sql = StringUtils.EMPTY;
+        String sql;
 
         if ( eventInterval == EventInterval.DAY )
         {

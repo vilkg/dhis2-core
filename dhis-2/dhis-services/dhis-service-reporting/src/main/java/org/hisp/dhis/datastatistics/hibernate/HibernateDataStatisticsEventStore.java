@@ -60,8 +60,9 @@ public class HibernateDataStatisticsEventStore
     implements DataStatisticsEventStore
 {
 
-    public HibernateDataStatisticsEventStore(SessionFactory sessionFactory, JdbcTemplate jdbcTemplate) {
-        super(sessionFactory, jdbcTemplate, DataStatisticsEvent.class);
+    public HibernateDataStatisticsEventStore( SessionFactory sessionFactory, JdbcTemplate jdbcTemplate )
+    {
+        super( sessionFactory, jdbcTemplate, DataStatisticsEvent.class );
     }
 
     @Override

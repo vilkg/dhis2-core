@@ -90,36 +90,36 @@ import com.google.common.collect.Sets;
 /**
  * @author Jim Grace
  */
-@Service( "org.hisp.dhis.predictor.PredictorService" )
+@Service( "org.hisp.dhis.predictor.PredictionService" )
 @Transactional
 public class DefaultPredictionService
     implements PredictionService
 {
     private static final Log log = LogFactory.getLog( DefaultPredictionService.class );
 
-    private PredictorService predictorService;
+    private final PredictorService predictorService;
 
-    private ConstantService constantService;
+    private final ConstantService constantService;
 
-    private ExpressionService expressionService;
+    private final ExpressionService expressionService;
 
-    private DataValueService dataValueService;
+    private final DataValueService dataValueService;
 
-    private CategoryService categoryService;
+    private final CategoryService categoryService;
 
-    private OrganisationUnitService organisationUnitService;
+    private final OrganisationUnitService organisationUnitService;
 
-    private PeriodService periodService;
+    private final PeriodService periodService;
 
-    private IdentifiableObjectManager idObjectManager;
+    private final IdentifiableObjectManager idObjectManager;
 
     private AnalyticsService analyticsService;
 
-    private Notifier notifier;
+    private final Notifier notifier;
 
-    private BatchHandlerFactory batchHandlerFactory;
+    private final BatchHandlerFactory batchHandlerFactory;
 
-    private CurrentUserService currentUserService;
+    private final CurrentUserService currentUserService;
 
     public DefaultPredictionService( PredictorService predictorService, ConstantService constantService,
         ExpressionService expressionService, DataValueService dataValueService, CategoryService categoryService,
@@ -152,6 +152,15 @@ public class DefaultPredictionService
         this.notifier = notifier;
         this.batchHandlerFactory = batchHandlerFactory;
         this.currentUserService = currentUserService;
+    }
+
+    /**
+     * Used only for testing, remove when test is refactored
+     */
+    @Deprecated
+    public void setAnalyticsService( AnalyticsService analyticsService )
+    {
+        this.analyticsService = analyticsService;
     }
 
     // -------------------------------------------------------------------------

@@ -82,9 +82,9 @@ public class DefaultInterpretationService
 
     private final InterpretationStore interpretationStore;
 
-    private final CurrentUserService currentUserService;
+    private CurrentUserService currentUserService;
     
-    private final UserService userService;
+    private UserService userService;
     
     private final PeriodService periodService;
 
@@ -119,6 +119,24 @@ public class DefaultInterpretationService
         this.aclService = aclService;
         this.i18nManager = i18nManager;
         this.configurationProvider = configurationProvider;
+    }
+
+    /**
+     * Used only for testing, remove when test is refactored
+     */
+    @Deprecated
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
+        this.currentUserService = currentUserService;
+    }
+
+    /**
+     * Used only for testing, remove when test is refactored
+     */
+    @Deprecated
+    public void setUserService( UserService userService )
+    {
+        this.userService = userService;
     }
 
     // -------------------------------------------------------------------------

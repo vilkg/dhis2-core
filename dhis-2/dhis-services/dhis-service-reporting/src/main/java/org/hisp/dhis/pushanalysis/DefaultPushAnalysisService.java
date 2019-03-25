@@ -132,7 +132,7 @@ public class DefaultPushAnalysisService
         FileResourceService fileResourceService, CurrentUserService currentUserService,
         ReportTableService reportTableService, MapGenerationService mapGenerationService, ChartService chartService,
         I18nManager i18nManager, @Qualifier( "emailMessageSender" ) MessageSender messageSender,
-        IdentifiableObjectStore<PushAnalysis> pushAnalysisStore )
+        @Qualifier("org.hisp.dhis.pushanalysis.PushAnalysisStore") IdentifiableObjectStore<PushAnalysis> pushAnalysisStore )
     {
         checkNotNull( notifier );
         checkNotNull( systemSettingManager );

@@ -99,7 +99,7 @@ public class DefaultValidationService
 
     private final AnalyticsService analyticsService;
     
-    private final CurrentUserService currentUserService;
+    private CurrentUserService currentUserService;
 
     public DefaultValidationService( PeriodService periodService, OrganisationUnitService organisationUnitService,
         ExpressionService expressionService, DimensionService dimensionService, DataValueService dataValueService,
@@ -134,6 +134,15 @@ public class DefaultValidationService
         this.applicationContext = applicationContext;
         this.validationResultService = validationResultService;
         this.analyticsService = analyticsService;
+        this.currentUserService = currentUserService;
+    }
+
+    /**
+     * Used only for testing, remove when test is refactored
+     */
+    @Deprecated
+    public void setCurrentUserService( CurrentUserService currentUserService )
+    {
         this.currentUserService = currentUserService;
     }
 

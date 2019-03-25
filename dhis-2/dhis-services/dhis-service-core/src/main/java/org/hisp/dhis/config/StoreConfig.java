@@ -70,7 +70,6 @@ import org.hisp.dhis.report.Report;
 import org.hisp.dhis.reporttable.ReportTable;
 import org.hisp.dhis.scheduling.JobConfiguration;
 import org.hisp.dhis.security.acl.AclService;
-import org.hisp.dhis.setting.SystemSetting;
 import org.hisp.dhis.setting.hibernate.HibernateSystemSettingStore;
 import org.hisp.dhis.user.CurrentUserService;
 import org.hisp.dhis.user.UserAccess;
@@ -79,7 +78,6 @@ import org.hisp.dhis.user.UserGroupAccess;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 /**
