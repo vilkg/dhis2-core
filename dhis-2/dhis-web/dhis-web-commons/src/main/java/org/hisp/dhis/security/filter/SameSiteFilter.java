@@ -41,14 +41,17 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpHeaders;
 
 public class SameSiteFilter implements javax.servlet.Filter {
+
+    private static final String SAMESITE = "SameSite=lax";
+
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
     }
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-        chain.doFilter(request, response);
         addSameSiteCookieAttribute((HttpServletResponse) response); // add SameSite=strict cookie attribute
+        chain.doFilter(request, response);
     }
 
     private void addSameSiteCookieAttribute(HttpServletResponse response) {
@@ -56,11 +59,11 @@ public class SameSiteFilter implements javax.servlet.Filter {
         boolean firstHeader = true;
         for (String header : headers) { // there can be multiple Set-Cookie attributes
             if (firstHeader) {
-                response.setHeader(HttpHeaders.SET_COOKIE, String.format("%s; %s", header, "SameSite=Strict"));
+                response.setHeader(HttpHeaders.SET_COOKIE, String.format("%s; %s", header, SAMESITE));
                 firstHeader = false;
                 continue;
             }
-            response.addHeader(HttpHeaders.SET_COOKIE, String.format("%s; %s", header, "SameSite=Strict"));
+            response.addHeader(HttpHeaders.SET_COOKIE, String.format("%s; %s", header, SAMESITE));
         }
     }
 
