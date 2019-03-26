@@ -61,6 +61,8 @@
 
   <bean id="appCacheFilter" class="org.hisp.dhis.servlet.filter.AppCacheFilter" />
 
+  <bean id="sameSiteFilter" class="org.hisp.dhis.servlet.filter.SameSiteFilter" />
+
   <sec:http access-decision-manager-ref="accessDecisionManager"
     authentication-manager-ref="authenticationManager" pattern="/dhis-web-commons/javascripts/**" security="none" />
   <sec:http access-decision-manager-ref="accessDecisionManager"
