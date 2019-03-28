@@ -11,9 +11,9 @@ pipeline {
         stage('Api tests') {
           steps {
             dir(path: 'dhis-2/dhis-e2e-test') {
-              sh '''docker-compose up --build -d
-mvn test -DbaseUrl=http://localhost:8070/api
-docker-compose down -v --rmi all --remove-orphans'''
+              sh 'docker-compose up --build -d'
+              sh 'mvn test -DbaseUrl=http://localhost:8070/api'
+              sh 'docker-compose down -v --rmi all --remove-orphans'
             }
 
           }
