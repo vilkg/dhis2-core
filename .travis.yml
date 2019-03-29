@@ -11,8 +11,9 @@ before_install:
 - rm ~/.m2/settings.xml
 
 matrix: 
-  -PROFILE=default
-  -PROFILE=integration
+  include:
+    -env:PROFILE=default
+    -env:PROFILE=integration
   
 script: "mvn clean install -DskipTests=false -P${PROFILE}"
 branches:
