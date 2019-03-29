@@ -11,7 +11,7 @@ addons:
 before_install:
 - rm ~/.m2/settings.xml
   
-matrix: 
+jobs: 
   include:
     - stage: tests 
       script: 
