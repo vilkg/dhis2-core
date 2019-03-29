@@ -4,6 +4,7 @@ pipeline {
     stage('Integration tests ') {
       steps {
         sh 'mvn -f dhis-2/pom.xml install -Pintegration'
+        sh ''
       }
     }
   }
