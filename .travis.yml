@@ -14,8 +14,7 @@ matrix:
   -PROFILE=default
   -PROFILE=integration
   
-script:
-  -  mvn clean install -DskipTests=false -P$PROFILE"
+script: "mvn clean install -DskipTests=false -P$PROFILE"
 branches:
   only:
   - master
