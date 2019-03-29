@@ -13,7 +13,7 @@ pipeline {
             dir(path: 'dhis-2/dhis-e2e-test') {
               sh 'docker-compose up -d'
               sh 'mvn test -DbaseUrl=http://localhost:8070/api'
-              sh 'docker-compose down'
+              sh 'docker-compose down -v'
             }
 
           }
