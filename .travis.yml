@@ -12,14 +12,9 @@ before_install:
 - rm ~/.m2/settings.xml
 
 env: 
-  - MAVEN_SCRIPT="mvn clean install -DskipTests=false -DargLine="-Xmx512m -Xms256m" -q --update-snapshots -f  ./dhis-2/pom.xml"
-  - MAVEN_SCRIPT="mvn clean install -DskipTests=false -DargLine="-Xmx512m -Xms256m" -q --update-snapshots -f ./dhis-2/dhis-web/pom.xml"
+  - MAVEN_SCRIPT="mvn clean install -DskipTests=false -DargLine=\"-Xmx512m -Xms256m\" -q --update-snapshots -f  ./dhis-2/pom.xml"
+  - MAVEN_SCRIPT="mvn clean install -DskipTests=false -DargLine=\"-Xmx512m -Xms256m\" -q --update-snapshots -f ./dhis-2/dhis-web/pom.xml"
   - MAVEN_SCRIPT="mvn clean install -Pintegration"
-matrix: 
-  include:
-    -env: MAVEN_SCRIPT="mvn clean install -DskipTests=false -DargLine="-Xmx512m -Xms256m" -q --update-snapshots -f  ./dhis-2/pom.xml"
-    -env: MAVEN_SCRIPT="mvn clean install -DskipTests=false -DargLine="-Xmx512m -Xms256m" -q --update-snapshots -f ./dhis-2/dhis-web/pom.xml"
-    -env: MAVEN_SCRIPT="mvn clean install -Pintegration"
   
 script: 
  - $MAVEN_SCRIPT
