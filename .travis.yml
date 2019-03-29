@@ -21,7 +21,7 @@ matrix:
     -env: PROFILE=integration
   
 script: 
-  - mvn clean install -DskipTests=false -P${PROFILE}
+  - mvn clean install -DskipTests=false -P$PROFILE
 branches:
   only:
   - master
