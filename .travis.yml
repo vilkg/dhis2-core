@@ -10,14 +10,18 @@ addons:
 
 before_install:
 - rm ~/.m2/settings.xml
-
-env: 
-  - MAVEN_SCRIPT="mvn clean install -DskipTests=false -q --update-snapshots -f ./dhis-2/pom.xml"
-  - MAVEN_SCRIPT="mvn clean install -DskipTests=false -q --update-snapshots -f ./dhis-2/dhis-web/pom.xml"
-  - MAVEN_SCRIPT="mvn clean install -Pintegration -f ./dhis-2/pom.xml"
   
-script: 
- - $MAVEN_SCRIPT
+jobs: 
+  include:
+    - stage: unit tests 
+      script: 
+        - mvn clean install -DskipTests=false -q --update-snapshots -f ./dhis-2/pom.xml
+        - mvn clean install -DskipTests=false -q --update-snapshots -f ./dhis-2/dhis-web/pom.xml
+        
+    - stage: integration tests
+      script: 
+        - mvn clean install -Pintegration -f ./dhis-2/pom.xml
+        
 branches:
   only:
   - master
