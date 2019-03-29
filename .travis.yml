@@ -7,6 +7,11 @@ addons:
   apt:
     packages:
     - oracle-java8-installer
+    
+env:
+  - PROFILE=default
+  - PROFILE=integration
+
 before_install:
 - rm ~/.m2/settings.xml
 
