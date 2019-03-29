@@ -13,12 +13,11 @@ before_install:
   
 matrix: 
   include:
-    - stage: unit tests 
+    - stage: tests 
       script: 
         - mvn clean install -DskipTests=false -q --update-snapshots -f ./dhis-2/pom.xml
         - mvn clean install -DskipTests=false -q --update-snapshots -f ./dhis-2/dhis-web/pom.xml
         
-    - stage: integration tests
       script: 
         - mvn clean install -Pintegration -f ./dhis-2/pom.xml
         
