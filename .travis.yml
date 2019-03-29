@@ -7,20 +7,18 @@ addons:
   apt:
     packages:
     - oracle-java8-installer
-    
-env:
-  - PROFILE=default
-  - PROFILE=integration
 
 before_install:
 - rm ~/.m2/settings.xml
 
 matrix: 
   include:
-    -env: PROFILE=default
-    -env: PROFILE=integration
+    -env: MAVEN_SCRIPT="mvn clean install -DskipTests=false -DargLine="-Xmx512m -Xms256m" -q --update-snapshots -f  ./dhis-2/pom.xml"
+    -env: MAVEN_SCRIPT="mvn clean install -DskipTests=false -DargLine="-Xmx512m -Xms256m" -q --update-snapshots -f ./dhis-2/dhis-web/pom.xml"
+    -env: MAVEN_SCRIPT="mvn clean install -Pintegration"
   
-script: mvn clean install -DskipTests=false -P $PROFILE
+script: 
+ - $MAVEN_SCRIPT
 branches:
   only:
   - master
