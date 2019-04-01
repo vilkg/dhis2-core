@@ -13,9 +13,8 @@ before_install:
   
 jobs: 
   include:
-    - stage: tests 
-      
-    - name: integration
+    - stage: tests
+      name: integration
       script: 
         - mvn clean install -Pintegration -f ./dhis-2/pom.xml
         
