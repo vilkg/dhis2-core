@@ -16,7 +16,7 @@ jobs:
   - stage: Tests
     name: integration
     script:
-    - mvn clean install -Pintegration -f ./dhis-2/pom.xml
+    - mvn test -Pintegration -f ./dhis-2/pom.xml
 
   - name: api
     script:
