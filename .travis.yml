@@ -21,7 +21,8 @@ jobs:
   - name: api
     script:
     - cd dhis-2/dhis-e2e-test
-    - docker-compose up -d --build-arg ADDITIONAL_MAVEN_BUILD_ARGS="-q"
+    - docker-compose build --build-arg ADDITIONAL_MAVEN_BUILD_ARGS="-q"
+    - docker-compose up -d
     - mvn test -DbaseUrl=http://localhost:8070/api
     - docker-compose down
 
