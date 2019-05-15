@@ -52,4 +52,18 @@ pipeline {
     }
 
   }
+  
+  post {
+       always {
+          // destroy container
+          unstash 'source'
+           dir ("dhis-2/dhis-e2e-test") {
+             sh "docker-compose -p ${DOCKER_UNIQUE_PARAMETER} down"
+             sh "docker-compose -f docker-compose.e2e.yml -p ${DOCKER_UNIQUE_PARAMETER} down"
+             sh "docker image prune --force --filter 'until=2h' --filter label=stage=intermediate"
+             sh "docker image prune --force --filter 'until=2h'"
+          }
+
+       }
+  }
 }
