@@ -5,6 +5,7 @@ pipeline {
     DOCKER_IMAGE_TAG = ''
     DOCKER_IMAGE_NAME = ''
     IMAGE_VERSION = 'dev'
+    DOCKER_UNIQUE_PARAMETER = ''
   }
   stages {
     stage('Setup environment') {
@@ -14,11 +15,11 @@ pipeline {
           IMAGE_VERSION = pom.version.toLowerCase()
           echo "Image version: ${IMAGE_VERSION}"
           
-          
+          DOCKER_UNIQUE_PARAMETER = ${env.JOB_NAME}
           DOCKER_IMAGE_TAG = "${IMAGE_VERSION}-alpine"
             echo "Will tag image as ${DOCKER_IMAGE_TAG}"
             dir ("dhis-2/dhis-e2e-test") {
-              sh "TAG=${DOCKER_IMAGE_TAG} docker-compose up -d --build"
+              sh "TAG=${DOCKER_IMAGE_TAG} docker-compose -p ${DOCKER_UNIQUE_PARAMETER} up -d --build"
             }
           
           DOCKER_IMAGE_NAME = "dhis2-core:${DOCKER_IMAGE_TAG}"
@@ -30,7 +31,7 @@ pipeline {
     stage('Run api tests') {
       steps {
       dir("dhis-2/dhis-e2e-test") {
-       
+        sh "docker-compose -p ${DOCKER_UNIQUE_PARAMETER} -f docker-compose.e2e.yml up --build"
       }
       }
       
