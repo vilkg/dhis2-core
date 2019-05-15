@@ -1,5 +1,6 @@
 pipeline {
   agent any
+  options { disableConcurrentBuilds() }
   environment {
     DOCKER_HUB_REPOSITORY = "$DOCKER_HUB_OWNER"
     DOCKER_IMAGE_TAG = ''
