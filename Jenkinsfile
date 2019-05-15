@@ -1,5 +1,7 @@
 pipeline {
-  agent any
+  agent {
+    label 'docker'
+  }
   environment {
     DOCKER_HUB_REPOSITORY = "$DOCKER_HUB_OWNER"
     DOCKER_IMAGE_TAG = ''
