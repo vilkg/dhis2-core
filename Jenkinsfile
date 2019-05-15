@@ -17,7 +17,7 @@ pipeline {
           pom = readMavenPom file: 'dhis-2/pom.xml'
           IMAGE_VERSION = pom.version.toLowerCase()
           echo "Image version: ${IMAGE_VERSION}"
-          sh "echo whoami"
+          sh "echo $(whoami)"
           DOCKER_UNIQUE_PARAMETER = "${env.JOB_NAME}"
           echo "Docker parameter: ${DOCKER_UNIQUE_PARAMETER}"
           DOCKER_IMAGE_TAG = "${IMAGE_VERSION}-alpine"
