@@ -1,6 +1,6 @@
 pipeline {
   agent {
-    label 'docker'
+    label 'agent2'
   }
   options { disableConcurrentBuilds() }
   environment {
