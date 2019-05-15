@@ -1,5 +1,7 @@
 pipeline {
-  agent any
+  agent {
+    label 'docker'
+  }
   options { disableConcurrentBuilds() }
   environment {
     DOCKER_HUB_REPOSITORY = "$DOCKER_HUB_OWNER"
