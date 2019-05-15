@@ -35,7 +35,7 @@ pipeline {
     stage('Run api tests') {
       steps {
       dir("dhis-2/dhis-e2e-test") {
-        sh "docker-compose -p ${DOCKER_UNIQUE_PARAMETER} -f docker-compose.e2e.yml up --build --exit-code-from e2e-test"
+        sh "TAG=${DOCKER_IMAGE_TAG} docker-compose -p ${DOCKER_UNIQUE_PARAMETER} -f docker-compose.e2e.yml up --build --exit-code-from e2e-test"
       }
       }
       
