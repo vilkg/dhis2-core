@@ -18,7 +18,7 @@ pipeline {
     stages {
         stage('Prepare env for release deployment') {
             when{
-                buildingTag()
+                tag pattern: "^2.\d+.*", comparator: "REGEXP"
             }
             steps {
                 script {
