@@ -12,20 +12,17 @@ before_install:
 
 jobs:
   include:
+  - Build
   - stage: Tests
-    name: unit
+    name: integration
     script:
-    - mvn clean install -DskipTests=false -q --update-snapshots -f ./dhis-2/pom.xml
-    - mvn clean install -DskipTests=false -q --update-snapshots -f ./dhis-2/dhis-web/pom.xml
-
-  - name: integration
-    script:
-    - mvn clean install -Pintegration -f ./dhis-2/pom.xml
+    - mvn test -Pintegration -f ./dhis-2/pom.xml
 
   - name: api
     script:
     - cd dhis-2/dhis-e2e-test
-    - docker-compose up -d --build
+    - docker-compose build --build-arg ADDITIONAL_MAVEN_BUILD_ARGS="-q"  e2e-test-web 
+    - docker-compose up -d
     - mvn test -DbaseUrl=http://localhost:8070/api
     - docker-compose down
 
